@@ -209,24 +209,43 @@ function ContractCard({ contract }: { contract: PublicKey }) {
             </button>
           </div>
           <div className="text-center space-y-4">
-            <p>
-              <ExplorerLink
-                path={`account/${contract}`}
-                label={ellipsify(contract.toString())}
-              />
-            </p>
             <div className="space-y-2">
-              <p className="font-bold">Recipients:</p>
-              {data.recipients.map((recipient, index) => (
-                <p key={index} className="text-sm">
-                  {index + 1}.{" "}
-                  <ExplorerLink
-                    path={`account/${recipient}`}
-                    label={ellipsify(recipient.toString())}
-                  />
-                  {index < data.paidTranches.toNumber() && " ✓"}
+              <p>
+                <span className="font-bold">Contract: </span>
+                <ExplorerLink
+                  path={`account/${contract}`}
+                  label={ellipsify(contract.toString())}
+                />
+              </p>
+              <p>
+                <span className="font-bold">Recipient: </span>
+                <ExplorerLink
+                  path={`account/${data.recipients[0]}`}
+                  label={ellipsify(data.recipients[0].toString())}
+                />
+              </p>
+              <div className="mt-4">
+                <p className="font-bold mb-2">Payment Progress:</p>
+                <div className="flex gap-1 justify-center flex-wrap">
+                  {Array(data.trancheCount.toNumber())
+                    .fill(0)
+                    .map((_, index) => (
+                      <span
+                        key={index}
+                        className={`w-3 h-3 rounded-full ${
+                          index < data.paidTranches.toNumber()
+                            ? "bg-success"
+                            : "bg-base-300"
+                        }`}
+                        title={`Tranche ${index + 1}`}
+                      />
+                    ))}
+                </div>
+                <p className="mt-2 text-sm">
+                  {data.paidTranches.toNumber()} of{" "}
+                  {data.trancheCount.toNumber()} tranches paid
                 </p>
-              ))}
+              </div>
             </div>
           </div>
         </div>
