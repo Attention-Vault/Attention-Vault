@@ -5,13 +5,14 @@ import { UiLayout } from "@/components/ui/ui-layout";
 import { ReactQueryProvider } from "./react-query-provider";
 
 export const metadata = {
-  title: "Frontend",
+  title: "Attention Vault",
 };
 
 const links: { label: string; path: string }[] = [
-  { label: "Account", path: "/account" },
-  { label: "Clusters", path: "/clusters" },
-  { label: "Frontend Program", path: "/frontend" },
+  // { label: "Account", path: "/account" },
+  // { label: "Clusters", path: "/clusters" },
+  { label: "For Companies", path: "/frontend" },
+  { label: "For Influencers", path: "/influencer" },
 ];
 
 export default function RootLayout({
