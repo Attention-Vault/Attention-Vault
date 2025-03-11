@@ -57,18 +57,18 @@ function ContractCard({ contract }: { contract: PublicKey }) {
     data.paidTranches.toNumber() === data.trancheCount.toNumber();
 
   return (
-    <div className="bg-base-100 p-4 border-l-2 border-base-300 hover:border-primary transition-all duration-300">
-      <div className="flex justify-between items-start mb-3">
+    <div className="bg-base-100 p-4 border-l-2 border-base-300 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-md">
+      <div className="flex justify-between items-start mb-4">
         <div>
-          <h3 className="text-base font-semibold">
+          <h3 className="text-lg font-semibold">
             {totalAmount.toFixed(2)} SOL Contract
           </h3>
-          <div className="text-xs text-base-content/70">
+          <div className="text-sm text-base-content/70">
             {trancheAmount.toFixed(2)} SOL per tranche
           </div>
         </div>
         <div
-          className={`badge badge-sm ${
+          className={`badge badge-md ${
             isCompleted ? "badge-success" : "badge-primary"
           }`}
         >
@@ -76,10 +76,10 @@ function ContractCard({ contract }: { contract: PublicKey }) {
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div>
-          <div className="flex justify-between text-xs mb-1">
-            <span>Progress</span>
+          <div className="flex justify-between text-sm mb-2">
+            <span className="font-medium">Progress</span>
             <span>
               {(
                 (data.paidTranches.toNumber() / data.trancheCount.toNumber()) *
@@ -95,15 +95,15 @@ function ContractCard({ contract }: { contract: PublicKey }) {
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="border-l border-success/30 pl-2">
-            <div className="text-xs text-base-content">Paid</div>
-            <div className="font-medium text-base-content">
+          <div className="border-l-2 border-success/30 pl-3 py-2">
+            <div className="text-sm text-base-content/70">Paid</div>
+            <div className="font-semibold text-success">
               {paidAmount.toFixed(2)} SOL
             </div>
           </div>
-          <div className="border-l border-primary/30 pl-2">
-            <div className="text-xs text-base-content">Remaining</div>
-            <div className="font-medium text-base-content">
+          <div className="border-l-2 border-primary/30 pl-3 py-2">
+            <div className="text-sm text-base-content/70">Remaining</div>
+            <div className="font-semibold text-primary">
               {remainingAmount.toFixed(2)} SOL
             </div>
           </div>
@@ -205,31 +205,35 @@ export function CreateContract() {
   };
 
   return (
-    <div className="bg-base-100 p-6 border-b border-base-300">
-      <h2 className="text-xl font-bold mb-4">Create Payment Contract</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 max-w-3xl">
+    <div className="bg-base-100 p-6 md:p-8 border-b border-base-300">
+      <h2 className="text-2xl font-bold mb-6">Create Payment Contract</h2>
+      <form onSubmit={handleSubmit} className="space-y-6 max-w-3xl">
         <div className="form-control">
           <label className="label py-1">
-            <span className="label-text font-medium">Recipient Address</span>
+            <span className="label-text text-base font-medium">
+              Recipient Address
+            </span>
           </label>
           <input
             type="text"
-            className="input input-bordered input-sm w-full bg-base-100"
+            className="input input-bordered w-full bg-base-100"
             value={recipient}
             onChange={(e) => setRecipient(e.target.value)}
             placeholder="Enter the recipient's Solana address"
           />
         </div>
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="form-control">
             <label className="label py-1">
-              <span className="label-text font-medium">Total Amount (SOL)</span>
+              <span className="label-text text-base font-medium">
+                Total Amount (SOL)
+              </span>
             </label>
             <input
               type="number"
               step="0.1"
               min="0"
-              className="input input-bordered input-sm w-full bg-base-100"
+              className="input input-bordered w-full bg-base-100"
               value={totalAmount}
               onChange={(e) => setTotalAmount(e.target.value)}
               placeholder="0.00"
@@ -237,24 +241,24 @@ export function CreateContract() {
           </div>
           <div className="form-control">
             <label className="label py-1">
-              <span className="label-text font-medium">Number of Tranches</span>
+              <span className="label-text text-base font-medium">
+                Number of Tranches
+              </span>
             </label>
             <input
               type="number"
               min="1"
-              className="input input-bordered input-sm w-full bg-base-100"
+              className="input input-bordered w-full bg-base-100"
               value={trancheCount}
               onChange={(e) => setTrancheCount(e.target.value)}
               placeholder="1"
             />
           </div>
         </div>
-        {error && (
-          <div className="alert alert-error alert-sm py-2 text-sm">{error}</div>
-        )}
+        {error && <div className="alert alert-error py-3 text-sm">{error}</div>}
         <button
           type="submit"
-          className="btn btn-primary btn-sm"
+          className="btn btn-primary btn-md w-full md:w-auto"
           disabled={createContract.isPending}
         >
           Create Contract
@@ -341,7 +345,7 @@ export function ContractList() {
       ) : contractGroups.size > 0 ? (
         Array.from(contractGroups.values()).map((group) => (
           <div key={group.recipient} className="py-4">
-            <div className="container mx-auto">
+            <div className="container mx-auto px-4 lg:px-8">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-base-200">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"

@@ -287,27 +287,13 @@ export default function InfluencerUi() {
   const { programId } = useFrontendProgram();
 
   return publicKey ? (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 lg:px-8 py-8">
       <AppHero
         title={
-          <div className="flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="h-6 w-6 text-primary"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
-                />
-              </svg>
-            </div>
-            <span>Influencer Dashboard</span>
+          <div className="flex items-center justify-center w-full">
+            <h1 className="text-4xl font-bold text-center">
+              Influencer Dashboard
+            </h1>
           </div>
         }
         subtitle="Track and manage your incoming payment contracts"
@@ -323,7 +309,7 @@ export default function InfluencerUi() {
       <ContractList />
     </div>
   ) : (
-    <div className="min-h-screen flex items-center justify-center bg-base-200">
+    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
       <div className="text-center space-y-6">
         <div className="w-20 h-20 mx-auto rounded-lg bg-primary/10 flex items-center justify-center">
           <svg

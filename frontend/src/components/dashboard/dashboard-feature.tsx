@@ -23,13 +23,13 @@ export default function DashboardFeature() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <button
-                onClick={() => router.push("/frontend")}
+                onClick={() => router.push("/company")}
                 className="btn btn-primary"
               >
                 Launch Company Dashboard
               </button>
               <button
-                onClick={() => router.push("/frontend")}
+                onClick={() => router.push("/company")}
                 className="btn btn-accent"
               >
                 View Influencer Dashboard
@@ -129,7 +129,7 @@ export default function DashboardFeature() {
                 </div>
                 <div className="card-actions justify-end mt-6">
                   <button
-                    onClick={() => router.push("/frontend")}
+                    onClick={() => router.push("/company")}
                     className="btn btn-primary"
                   >
                     Launch Company Dashboard
@@ -221,7 +221,7 @@ export default function DashboardFeature() {
                 </div>
                 <div className="card-actions justify-end mt-6">
                   <button
-                    onClick={() => router.push("/influencer")}
+                    onClick={() => router.push("/company")}
                     className="btn btn-accent"
                   >
                     View Influencer Dashboard
