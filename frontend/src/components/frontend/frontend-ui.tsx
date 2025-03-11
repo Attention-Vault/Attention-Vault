@@ -2,8 +2,10 @@
 
 import { Keypair, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
 import { useMemo, useState } from "react";
-import { ellipsify } from "../ui/ui-layout";
+import { ellipsify, AppHero } from "../ui/ui-layout";
 import { ExplorerLink } from "../cluster/cluster-ui";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletButton } from "../solana/solana-provider";
 import {
   useFrontendProgram,
   useFrontendProgramContract,
@@ -276,6 +278,7 @@ type ContractGroup = {
 
 export function ContractList() {
   const { contracts, getProgramAccount } = useFrontendProgram();
+  const { publicKey } = useWallet();
 
   const contractGroups = useMemo(() => {
     if (!contracts.data) return new Map<string, ContractGroup>();
@@ -430,6 +433,64 @@ export function ContractList() {
           </p>
         </div>
       )}
+    </div>
+  );
+}
+
+export default function FrontendUi() {
+  const { publicKey } = useWallet();
+  const { programId } = useFrontendProgram();
+
+  return publicKey ? (
+    <div className="container mx-auto px-4 lg:px-8 py-8">
+      <AppHero
+        title={
+          <div className="flex items-center justify-center w-full">
+            <h1 className="text-4xl font-bold text-center">
+              Company Dashboard
+            </h1>
+          </div>
+        }
+        subtitle="Create and manage your payment contracts"
+      >
+        <div className="flex items-center justify-center gap-2 mb-6">
+          <span className="text-base-content/70">Program ID:</span>
+          <ExplorerLink
+            path={`account/${programId}`}
+            label={ellipsify(programId.toString())}
+          />
+        </div>
+      </AppHero>
+      <CreateContract />
+      <ContractList />
+    </div>
+  ) : (
+    <div className="min-h-screen flex items-center justify-center bg-base-200 px-4">
+      <div className="text-center space-y-6">
+        <div className="w-20 h-20 mx-auto rounded-lg bg-primary/10 flex items-center justify-center">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-10 w-10 text-primary"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+            />
+          </svg>
+        </div>
+        <h1 className="text-4xl font-bold">Welcome to Your Dashboard</h1>
+        <p className="text-xl text-base-content/70">
+          Connect your wallet to view your contracts
+        </p>
+        <div className="mt-8">
+          <WalletButton />
+        </div>
+      </div>
     </div>
   );
 }
