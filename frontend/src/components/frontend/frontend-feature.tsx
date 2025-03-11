@@ -1,30 +1,33 @@
-'use client'
+"use client";
 
-import { useWallet } from '@solana/wallet-adapter-react'
-import { WalletButton } from '../solana/solana-provider'
-import { AppHero, ellipsify } from '../ui/ui-layout'
-import { ExplorerLink } from '../cluster/cluster-ui'
-import { useFrontendProgram } from './frontend-data-access'
-import { FrontendCreate, FrontendList } from './frontend-ui'
+import { useWallet } from "@solana/wallet-adapter-react";
+import { WalletButton } from "../solana/solana-provider";
+import { AppHero, ellipsify } from "../ui/ui-layout";
+import { ExplorerLink } from "../cluster/cluster-ui";
+import { useFrontendProgram } from "./frontend-data-access";
+import { CreateContract, ContractList } from "./frontend-ui";
 
 export default function FrontendFeature() {
-  const { publicKey } = useWallet()
-  const { programId } = useFrontendProgram()
+  const { publicKey } = useWallet();
+  const { programId } = useFrontendProgram();
 
   return publicKey ? (
     <div>
       <AppHero
-        title="Frontend"
+        title="Tranche Payment System"
         subtitle={
-          'Create a new account by clicking the "Create" button. The state of a account is stored on-chain and can be manipulated by calling the program\'s methods (increment, decrement, set, and close).'
+          "Create a new payment contract by specifying the total amount, number of tranches, and recipient addresses. The contract will automatically distribute the payment in equal tranches to the specified recipients."
         }
       >
         <p className="mb-6">
-          <ExplorerLink path={`account/${programId}`} label={ellipsify(programId.toString())} />
+          <ExplorerLink
+            path={`account/${programId}`}
+            label={ellipsify(programId.toString())}
+          />
         </p>
-        <FrontendCreate />
+        <CreateContract />
       </AppHero>
-      <FrontendList />
+      <ContractList />
     </div>
   ) : (
     <div className="max-w-4xl mx-auto">
@@ -34,5 +37,5 @@ export default function FrontendFeature() {
         </div>
       </div>
     </div>
-  )
+  );
 }

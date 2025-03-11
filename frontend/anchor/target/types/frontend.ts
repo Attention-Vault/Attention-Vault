@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/frontend.json`.
  */
 export type Frontend = {
-  "address": "Fm78SojvrcVBss6Rhz4KUxRHsqEdPqBGzcax5noV5ksN",
+  "address": "4SrGoGDvKuAkgvM1B3nHnWq1jhnPw48zim7NdrMeECbP",
   "metadata": {
     "name": "frontend",
     "version": "0.1.0",
@@ -14,90 +14,53 @@ export type Frontend = {
   },
   "instructions": [
     {
-      "name": "close",
+      "name": "closeContract",
       "discriminator": [
-        98,
-        165,
-        201,
-        177,
-        108,
-        65,
-        206,
-        96
-      ],
-      "accounts": [
-        {
-          "name": "payer",
-          "writable": true,
-          "signer": true
-        },
-        {
-          "name": "frontend",
-          "writable": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "decrement",
-      "discriminator": [
-        106,
-        227,
+        37,
+        244,
+        34,
         168,
-        59,
-        248,
-        27,
-        150,
-        101
+        92,
+        202,
+        80,
+        106
       ],
       "accounts": [
         {
-          "name": "frontend",
+          "name": "contract",
           "writable": true
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "contract"
+          ]
         }
       ],
       "args": []
     },
     {
-      "name": "increment",
+      "name": "createContract",
       "discriminator": [
-        11,
-        18,
-        104,
-        9,
-        104,
-        174,
-        59,
-        33
+        244,
+        48,
+        244,
+        178,
+        216,
+        88,
+        122,
+        52
       ],
       "accounts": [
         {
-          "name": "frontend",
-          "writable": true
-        }
-      ],
-      "args": []
-    },
-    {
-      "name": "initialize",
-      "discriminator": [
-        175,
-        175,
-        109,
-        31,
-        13,
-        152,
-        155,
-        237
-      ],
-      "accounts": [
-        {
-          "name": "payer",
+          "name": "contract",
           "writable": true,
           "signer": true
         },
         {
-          "name": "frontend",
+          "name": "owner",
           "writable": true,
           "signer": true
         },
@@ -106,58 +69,124 @@ export type Frontend = {
           "address": "11111111111111111111111111111111"
         }
       ],
-      "args": []
+      "args": [
+        {
+          "name": "totalAmount",
+          "type": "u64"
+        },
+        {
+          "name": "trancheCount",
+          "type": "u64"
+        },
+        {
+          "name": "recipients",
+          "type": {
+            "vec": "pubkey"
+          }
+        }
+      ]
     },
     {
-      "name": "set",
+      "name": "distributeTranche",
       "discriminator": [
-        198,
-        51,
-        53,
-        241,
+        4,
+        101,
+        117,
         116,
-        29,
-        126,
-        194
+        122,
+        242,
+        211,
+        91
       ],
       "accounts": [
         {
-          "name": "frontend",
+          "name": "contract",
           "writable": true
+        },
+        {
+          "name": "recipient",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true,
+          "relations": [
+            "contract"
+          ]
         }
       ],
-      "args": [
-        {
-          "name": "value",
-          "type": "u8"
-        }
-      ]
+      "args": []
     }
   ],
   "accounts": [
     {
-      "name": "frontend",
+      "name": "paymentContract",
       "discriminator": [
-        139,
-        245,
-        53,
-        17,
-        33,
-        123,
-        239,
-        59
+        151,
+        55,
+        24,
+        165,
+        12,
+        206,
+        38,
+        31
       ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "allTranchesPaid",
+      "msg": "All tranches have been paid"
+    },
+    {
+      "code": 6001,
+      "name": "invalidRecipient",
+      "msg": "Invalid recipient for current tranche"
+    },
+    {
+      "code": 6002,
+      "name": "invalidRecipientsCount",
+      "msg": "Number of recipients must match tranche count"
+    },
+    {
+      "code": 6003,
+      "name": "invalidAmount",
+      "msg": "Total amount must be greater than 0"
+    },
+    {
+      "code": 6004,
+      "name": "invalidTrancheCount",
+      "msg": "Tranche count must be greater than 0"
     }
   ],
   "types": [
     {
-      "name": "frontend",
+      "name": "paymentContract",
       "type": {
         "kind": "struct",
         "fields": [
           {
-            "name": "count",
-            "type": "u8"
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "totalAmount",
+            "type": "u64"
+          },
+          {
+            "name": "trancheCount",
+            "type": "u64"
+          },
+          {
+            "name": "recipients",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "paidTranches",
+            "type": "u64"
           }
         ]
       }

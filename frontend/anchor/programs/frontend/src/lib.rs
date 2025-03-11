@@ -2,69 +2,150 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("Fm78SojvrcVBss6Rhz4KUxRHsqEdPqBGzcax5noV5ksN");
+declare_id!("4SrGoGDvKuAkgvM1B3nHnWq1jhnPw48zim7NdrMeECbP");
 
 #[program]
 pub mod frontend {
     use super::*;
 
-  pub fn close(_ctx: Context<CloseFrontend>) -> Result<()> {
-    Ok(())
-  }
+    pub fn create_contract(
+        ctx: Context<CreateContract>,
+        total_amount: u64,
+        tranche_count: u64,
+        recipients: Vec<Pubkey>,
+    ) -> Result<()> {
+        require!(
+            recipients.len() as u64 == tranche_count,
+            TrancheError::InvalidRecipientsCount
+        );
+        require!(total_amount > 0, TrancheError::InvalidAmount);
+        require!(tranche_count > 0, TrancheError::InvalidTrancheCount);
 
-  pub fn decrement(ctx: Context<Update>) -> Result<()> {
-    ctx.accounts.frontend.count = ctx.accounts.frontend.count.checked_sub(1).unwrap();
-    Ok(())
-  }
+        let contract = &mut ctx.accounts.contract;
+        contract.owner = *ctx.accounts.owner.key;
+        contract.total_amount = total_amount;
+        contract.tranche_count = tranche_count;
+        contract.recipients = recipients;
+        contract.paid_tranches = 0;
 
-  pub fn increment(ctx: Context<Update>) -> Result<()> {
-    ctx.accounts.frontend.count = ctx.accounts.frontend.count.checked_add(1).unwrap();
-    Ok(())
-  }
+        // Transfer the total amount from owner to the contract account
+        let cpi_context = CpiContext::new(
+            ctx.accounts.system_program.to_account_info(),
+            anchor_lang::system_program::Transfer {
+                from: ctx.accounts.owner.to_account_info(),
+                to: contract.to_account_info(),
+            },
+        );
 
-  pub fn initialize(_ctx: Context<InitializeFrontend>) -> Result<()> {
-    Ok(())
-  }
+        anchor_lang::system_program::transfer(cpi_context, total_amount)?;
+        Ok(())
+    }
 
-  pub fn set(ctx: Context<Update>, value: u8) -> Result<()> {
-    ctx.accounts.frontend.count = value.clone();
-    Ok(())
-  }
+    pub fn distribute_tranche(ctx: Context<DistributeTranche>) -> Result<()> {
+        // First get all the data we need from the contract
+        let paid_tranches = ctx.accounts.contract.paid_tranches;
+        let tranche_count = ctx.accounts.contract.tranche_count;
+        let total_amount = ctx.accounts.contract.total_amount;
+        let expected_recipient = ctx.accounts.contract.recipients[paid_tranches as usize];
+
+        // Verify conditions
+        require!(
+            paid_tranches < tranche_count,
+            TrancheError::AllTranchesPaid
+        );
+
+        require!(
+            expected_recipient == ctx.accounts.recipient.key(),
+            TrancheError::InvalidRecipient
+        );
+
+        // Calculate tranche amount
+        let tranche_amount = total_amount / tranche_count;
+
+        // Get the account infos (these need to live long enough)
+        let recipient_info = ctx.accounts.recipient.to_account_info();
+        let contract_info = ctx.accounts.contract.to_account_info();
+
+        // Transfer the tranche amount to the recipient
+        let mut recipient_lamports = recipient_info.try_borrow_mut_lamports()?;
+        let mut contract_lamports = contract_info.try_borrow_mut_lamports()?;
+        
+        **recipient_lamports += tranche_amount;
+        **contract_lamports -= tranche_amount;
+
+        // Update the contract state last
+        let contract = &mut ctx.accounts.contract;
+        contract.paid_tranches += 1;
+        
+        Ok(())
+    }
+
+    pub fn close_contract(ctx: Context<CloseContract>) -> Result<()> {
+        let contract = &ctx.accounts.contract;
+        let remaining_balance = contract.total_amount
+            - (contract.paid_tranches * (contract.total_amount / contract.tranche_count));
+
+        if remaining_balance > 0 {
+            **ctx.accounts.owner.to_account_info().try_borrow_mut_lamports()? += remaining_balance;
+            **ctx.accounts.contract.to_account_info().try_borrow_mut_lamports()? -= remaining_balance;
+        }
+
+        Ok(())
+    }
 }
 
 #[derive(Accounts)]
-pub struct InitializeFrontend<'info> {
-  #[account(mut)]
-  pub payer: Signer<'info>,
-
-  #[account(
-  init,
-  space = 8 + Frontend::INIT_SPACE,
-  payer = payer
-  )]
-  pub frontend: Account<'info, Frontend>,
-  pub system_program: Program<'info, System>,
-}
-#[derive(Accounts)]
-pub struct CloseFrontend<'info> {
-  #[account(mut)]
-  pub payer: Signer<'info>,
-
-  #[account(
-  mut,
-  close = payer, // close account and return lamports to payer
-  )]
-  pub frontend: Account<'info, Frontend>,
+pub struct CreateContract<'info> {
+    #[account(
+        init,
+        payer = owner,
+        space = 8 + 32 + 8 + 8 + 8 + (32 * 10) // Adjust space for up to 10 recipients
+    )]
+    pub contract: Account<'info, PaymentContract>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
+    pub system_program: Program<'info, System>,
 }
 
 #[derive(Accounts)]
-pub struct Update<'info> {
-  #[account(mut)]
-  pub frontend: Account<'info, Frontend>,
+pub struct DistributeTranche<'info> {
+    #[account(mut, has_one = owner)]
+    pub contract: Account<'info, PaymentContract>,
+    /// CHECK: Recipient is verified in the instruction logic
+    #[account(mut)]
+    pub recipient: AccountInfo<'info>,
+    pub owner: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct CloseContract<'info> {
+    #[account(mut, has_one = owner, close = owner)]
+    pub contract: Account<'info, PaymentContract>,
+    #[account(mut)]
+    pub owner: Signer<'info>,
 }
 
 #[account]
 #[derive(InitSpace)]
-pub struct Frontend {
-  count: u8,
+pub struct PaymentContract {
+    pub owner: Pubkey,
+    pub total_amount: u64,
+    pub tranche_count: u64,
+    #[max_len(10)]
+    pub recipients: Vec<Pubkey>,
+    pub paid_tranches: u64,
+}
+
+#[error_code]
+pub enum TrancheError {
+    #[msg("All tranches have been paid")]
+    AllTranchesPaid,
+    #[msg("Invalid recipient for current tranche")]
+    InvalidRecipient,
+    #[msg("Number of recipients must match tranche count")]
+    InvalidRecipientsCount,
+    #[msg("Total amount must be greater than 0")]
+    InvalidAmount,
+    #[msg("Tranche count must be greater than 0")]
+    InvalidTrancheCount,
 }
