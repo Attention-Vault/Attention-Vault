@@ -274,7 +274,7 @@ function ContractList() {
           </div>
           <h2 className="text-3xl font-bold mb-2">No Contracts Found</h2>
           <p className="text-base-content/70">
-            You don't have any incoming payment contracts yet.
+            You don&apos;t have any incoming payment contracts yet.
           </p>
         </div>
       )}

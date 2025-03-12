@@ -60,7 +60,7 @@ export function useFrontendProgram() {
         .accounts({
           contract: keypair.publicKey,
           owner: provider.wallet.publicKey,
-          system_program: SystemProgram.programId,
+          // system_program: SystemProgram.programId,
         })
         .signers([keypair])
         .rpc();
@@ -141,7 +141,7 @@ export function useFrontendProgramContract({
         .accounts({
           contract: contractAddress,
           recipient: currentRecipient,
-          owner: provider.wallet.publicKey,
+          // owner: provider.wallet.publicKey,
         })
         .rpc();
     },
