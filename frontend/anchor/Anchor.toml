@@ -6,7 +6,7 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-frontend = "4SrGoGDvKuAkgvM1B3nHnWq1jhnPw48zim7NdrMeECbP"
+frontend = "5V9gDAvbC4Hy75b4YvdG9BMNyBrT1m3seMWaypxUxp85"
 
 [registry]
 url = "https://api.apr.dev"

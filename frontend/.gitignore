@@ -35,3 +35,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 tmp
+
+# paymaster contract keypair
+PAYcsC2NayUeMRD8q1y5gNAQsJFazPDHhEzGFDjTPLW.json

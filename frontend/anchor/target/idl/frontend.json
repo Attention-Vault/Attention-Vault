@@ -1,5 +1,5 @@
 {
-  "address": "4SrGoGDvKuAkgvM1B3nHnWq1jhnPw48zim7NdrMeECbP",
+  "address": "5V9gDAvbC4Hy75b4YvdG9BMNyBrT1m3seMWaypxUxp85",
   "metadata": {
     "name": "frontend",
     "version": "0.1.0",
@@ -103,10 +103,7 @@
         },
         {
           "name": "owner",
-          "signer": true,
-          "relations": [
-            "contract"
-          ]
+          "signer": true
         }
       ],
       "args": []
@@ -152,6 +149,11 @@
       "code": 6004,
       "name": "InvalidTrancheCount",
       "msg": "Tranche count must be greater than 0"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidSigner",
+      "msg": "Invalid signer - must be owner or authorized wallet"
     }
   ],
   "types": [

@@ -2,7 +2,7 @@
 
 use anchor_lang::prelude::*;
 
-declare_id!("4SrGoGDvKuAkgvM1B3nHnWq1jhnPw48zim7NdrMeECbP");
+declare_id!("5V9gDAvbC4Hy75b4YvdG9BMNyBrT1m3seMWaypxUxp85");
 
 #[program]
 pub mod frontend {
@@ -47,6 +47,8 @@ pub mod frontend {
         let tranche_count = ctx.accounts.contract.tranche_count;
         let total_amount = ctx.accounts.contract.total_amount;
         let expected_recipient = ctx.accounts.contract.recipients[paid_tranches as usize];
+        let owner = ctx.accounts.contract.owner;
+        let signer = ctx.accounts.owner.key();
 
         // Verify conditions
         require!(
@@ -59,6 +61,12 @@ pub mod frontend {
             TrancheError::InvalidRecipient
         );
 
+        // Verify that the signer is either the owner or the paymaster wallet
+        require!(
+            signer == owner || signer == Pubkey::new_from_array([5, 173, 146, 14, 43, 25, 195, 195, 61, 211, 88, 228, 220, 157, 53, 224, 196, 109, 251, 143, 180, 251, 84, 18, 234, 244, 93, 123, 240, 168, 245, 179]),
+            TrancheError::InvalidSigner
+        );
+        
         // Calculate tranche amount
         let tranche_amount = total_amount / tranche_count;
 
@@ -109,7 +117,7 @@ pub struct CreateContract<'info> {
 
 #[derive(Accounts)]
 pub struct DistributeTranche<'info> {
-    #[account(mut, has_one = owner)]
+    #[account(mut)]
     pub contract: Account<'info, PaymentContract>,
     /// CHECK: Recipient is verified in the instruction logic
     #[account(mut)]
@@ -148,4 +156,6 @@ pub enum TrancheError {
     InvalidAmount,
     #[msg("Tranche count must be greater than 0")]
     InvalidTrancheCount,
+    #[msg("Invalid signer - must be owner or authorized wallet")]
+    InvalidSigner,
 }
