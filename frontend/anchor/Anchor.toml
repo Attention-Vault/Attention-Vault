@@ -6,13 +6,13 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-frontend = "5V9gDAvbC4Hy75b4YvdG9BMNyBrT1m3seMWaypxUxp85"
+frontend = "Dwg2Z3cPq8p9dD7eaT3UqacBEwRBhisPDviLKyn5eF5j"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "https://api.testnet.sonic.game"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

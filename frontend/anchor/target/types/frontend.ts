@@ -5,7 +5,7 @@
  * IDL can be found at `target/idl/frontend.json`.
  */
 export type Frontend = {
-  "address": "5V9gDAvbC4Hy75b4YvdG9BMNyBrT1m3seMWaypxUxp85",
+  "address": "Dwg2Z3cPq8p9dD7eaT3UqacBEwRBhisPDviLKyn5eF5j",
   "metadata": {
     "name": "frontend",
     "version": "0.1.0",

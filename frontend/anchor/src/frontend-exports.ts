@@ -30,7 +30,7 @@ export function getFrontendProgramId(cluster: Cluster) {
     case "devnet":
     case "testnet":
       // This is the program ID for the Frontend program on devnet and testnet.
-      return new PublicKey("5V9gDAvbC4Hy75b4YvdG9BMNyBrT1m3seMWaypxUxp85");
+      return new PublicKey("Dwg2Z3cPq8p9dD7eaT3UqacBEwRBhisPDviLKyn5eF5j");
     case "mainnet-beta":
     default:
       return FRONTEND_PROGRAM_ID;
