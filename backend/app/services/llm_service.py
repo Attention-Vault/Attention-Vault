@@ -1,5 +1,6 @@
 from loguru import logger
 
+
 def validate_text(text: str) -> bool:
     """
     Validate that text is parseable by an LLM.
@@ -40,6 +41,7 @@ def validate_text(text: str) -> bool:
     except Exception as e:
         logger.error(f"Error validating text: {str(e)}")
         return False
+
 
 async def verify_post_content(post_text: str, verification_text: str) -> bool:
     """
@@ -87,10 +89,13 @@ async def verify_post_content(post_text: str, verification_text: str) -> bool:
 
         # 3. Check for keyword overlap as a basic heuristic
         # Extract important keywords from verification text (words longer than 5 chars)
-        verification_words = set([
-            word.lower() for word in verification_text.split()
-            if len(word) > 5 and word.isalnum()
-        ])
+        verification_words = set(
+            [
+                word.lower()
+                for word in verification_text.split()
+                if len(word) > 5 and word.isalnum()
+            ]
+        )
 
         # Count how many verification keywords appear in the post
         post_words = post_text.lower()
@@ -99,13 +104,17 @@ async def verify_post_content(post_text: str, verification_text: str) -> bool:
         # If we get at least 2 keyword matches, consider it valid (or at least 50% if few keywords)
         min_matches = min(2, max(1, len(verification_words) // 2))
 
-        logger.info(f"Found {len(matches)} matching keywords out of {len(verification_words)}")
+        logger.info(
+            f"Found {len(matches)} matching keywords out of {len(verification_words)}"
+        )
         logger.info(f"Required matches: {min_matches}")
 
         if len(matches) >= min_matches:
             return True
         else:
-            logger.warning("Not enough keyword matches between post and verification text")
+            logger.warning(
+                "Not enough keyword matches between post and verification text"
+            )
             return False
 
     except Exception as e:

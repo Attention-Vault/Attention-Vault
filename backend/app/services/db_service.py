@@ -12,7 +12,10 @@ DB_NAME = os.getenv("MONGO_DB_NAME", "attention_vault")
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
 db = client[DB_NAME]
 
-async def store_contract_data(contract_data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
+
+async def store_contract_data(
+    contract_data: Dict[str, Any]
+) -> Tuple[bool, Optional[str]]:
     """
     Store contract data in MongoDB.
 
@@ -32,9 +35,13 @@ async def store_contract_data(contract_data: Dict[str, Any]) -> Tuple[bool, Opti
             return False, "missing_contract_address"
 
         # Look up existing contract
-        existing_contract = await db.contracts.find_one({"contract_address": contract_address})
+        existing_contract = await db.contracts.find_one(
+            {"contract_address": contract_address}
+        )
         if existing_contract:
-            logger.info(f"Contract with address {contract_address} already exists, skipping insertion")
+            logger.info(
+                f"Contract with address {contract_address} already exists, skipping insertion"
+            )
             return False, "already_exists"
 
         # Add timestamp for when the contract was created
@@ -58,6 +65,7 @@ async def store_contract_data(contract_data: Dict[str, Any]) -> Tuple[bool, Opti
         logger.error(f"Database error while storing contract: {str(e)}")
         return False, f"database_error: {str(e)}"
 
+
 async def get_contract(contract_address: str) -> Optional[Dict[str, Any]]:
     """
     Retrieve contract data from MongoDB.
@@ -76,9 +84,9 @@ async def get_contract(contract_address: str) -> Optional[Dict[str, Any]]:
         logger.error(f"Database error while retrieving contract: {str(e)}")
         return None
 
+
 async def update_contract_with_post(
-    contract_address: str,
-    update_data: Dict[str, Any]
+    contract_address: str, update_data: Dict[str, Any]
 ) -> bool:
     """
     Update a contract with post data after a successful claim.
@@ -93,8 +101,7 @@ async def update_contract_with_post(
     try:
         # Update the contract with the provided data
         result = await db.contracts.update_one(
-            {"contract_address": contract_address},
-            {"$set": update_data}
+            {"contract_address": contract_address}, {"$set": update_data}
         )
 
         # Check if update was successful

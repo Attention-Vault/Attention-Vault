@@ -2,11 +2,20 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, HttpUrl
 from typing import Dict, Any, Optional, List
 from app.services.solana_service import validate_contract_address, distribute_tranche
-from app.services.twitter_service import validate_twitter_handle, validate_post_url, get_post_metrics
+from app.services.twitter_service import (
+    validate_twitter_handle,
+    validate_post_url,
+    get_post_metrics,
+)
 from app.services.llm_service import validate_text, verify_post_content
-from app.services.db_service import store_contract_data, get_contract, update_contract_with_post
+from app.services.db_service import (
+    store_contract_data,
+    get_contract,
+    update_contract_with_post,
+)
 
 router = APIRouter()
+
 
 # Models for request/response
 class NewContractRequest(BaseModel):
@@ -14,14 +23,17 @@ class NewContractRequest(BaseModel):
     verification_text: str
     twitter_handle: str
 
+
 class ClaimRequest(BaseModel):
     contract_address: str
     post_url: HttpUrl
+
 
 class ContractResponse(BaseModel):
     success: bool
     message: str
     reason: Optional[str] = None
+
 
 class ContractInfoResponse(BaseModel):
     contract_address: str
@@ -32,6 +44,7 @@ class ContractInfoResponse(BaseModel):
     status: str
     tranches_distributed: Optional[int] = 0
     metrics: Optional[Dict[str, Any]] = None
+
 
 @router.post("/new_contract", response_model=ContractResponse)
 async def create_new_contract(contract_data: NewContractRequest):
@@ -65,14 +78,17 @@ async def create_new_contract(contract_data: NewContractRequest):
                 return ContractResponse(
                     success=False,
                     message=f"Contract with address {contract_data.contract_address} already exists",
-                    reason=reason
+                    reason=reason,
                 )
-            return ContractResponse(success=False, message="Failed to store contract data", reason=reason)
+            return ContractResponse(
+                success=False, message="Failed to store contract data", reason=reason
+            )
 
         return ContractResponse(success=True, message="Contract created successfully")
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 
 # Implement /claim endpoint
 @router.post("/claim", response_model=ContractResponse)
@@ -97,7 +113,11 @@ async def claim_contract(claim_data: ClaimRequest):
 
         # Check if contract is already claimed
         if contract.get("status") == "claimed":
-            return ContractResponse(success=False, message="Contract has already been claimed", reason="already_claimed")
+            return ContractResponse(
+                success=False,
+                message="Contract has already been claimed",
+                reason="already_claimed",
+            )
 
         # Get contract details
         twitter_handle = contract["twitter_handle"]
@@ -109,11 +129,11 @@ async def claim_contract(claim_data: ClaimRequest):
             return ContractResponse(success=False, message="Invalid post URL")
 
         # Check if the post author matches the expected Twitter handle
-        if post_info["author_handle"].lower() != twitter_handle.lower().strip('@'):
+        if post_info["author_handle"].lower() != twitter_handle.lower().strip("@"):
             return ContractResponse(
                 success=False,
                 message=f"Post not authored by the expected influencer: {twitter_handle}",
-                reason="wrong_author"
+                reason="wrong_author",
             )
 
         # Verify post content against verification text requirements using LLM
@@ -122,18 +142,24 @@ async def claim_contract(claim_data: ClaimRequest):
             return ContractResponse(
                 success=False,
                 message="Post content does not match verification requirements",
-                reason="content_mismatch"
+                reason="content_mismatch",
             )
 
         # Get post metrics
         metrics = await get_post_metrics(claim_data.post_url)
         if not metrics:
-            return ContractResponse(success=False, message="Failed to retrieve post metrics")
+            return ContractResponse(
+                success=False, message="Failed to retrieve post metrics"
+            )
 
         # Get tranche thresholds from the contract on Solana
-        tranche_info = await validate_contract_address(claim_data.contract_address, get_tranches=True)
+        tranche_info = await validate_contract_address(
+            claim_data.contract_address, get_tranches=True
+        )
         if not tranche_info or "tranches" not in tranche_info:
-            return ContractResponse(success=False, message="Failed to retrieve tranche information")
+            return ContractResponse(
+                success=False, message="Failed to retrieve tranche information"
+            )
 
         # Calculate how many tranches the post qualifies for based on likes
         qualified_tranches = 0
@@ -147,8 +173,8 @@ async def claim_contract(claim_data: ClaimRequest):
             return ContractResponse(
                 success=False,
                 message=f"Post does not have enough likes to qualify for any tranche. "
-                        f"Current likes: {like_count}",
-                reason="insufficient_likes"
+                f"Current likes: {like_count}",
+                reason="insufficient_likes",
             )
 
         # Call distribute_tranche for each qualified tranche
@@ -164,18 +190,19 @@ async def claim_contract(claim_data: ClaimRequest):
             "metrics": metrics,
             "status": "claimed",
             "tranches_distributed": distributed_count,
-            "claimed_at": "now()"  # MongoDB will handle this as current time
+            "claimed_at": "now()",  # MongoDB will handle this as current time
         }
 
         await update_contract_with_post(claim_data.contract_address, update_data)
 
         return ContractResponse(
             success=True,
-            message=f"Successfully claimed contract and distributed {distributed_count} tranches"
+            message=f"Successfully claimed contract and distributed {distributed_count} tranches",
         )
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
 
 # Implement /info endpoint
 @router.get("/info/{contract_address}", response_model=ContractInfoResponse)
@@ -197,11 +224,13 @@ async def get_contract_info(contract_address: str):
             contract_address=contract["contract_address"],
             twitter_handle=contract["twitter_handle"],
             verification_text=contract["verification_text"],
-            created_at=contract["created_at"].isoformat() if "created_at" in contract else "",
+            created_at=(
+                contract["created_at"].isoformat() if "created_at" in contract else ""
+            ),
             status=contract["status"],
             post_url=contract.get("post_url"),
             tranches_distributed=contract.get("tranches_distributed", 0),
-            metrics=contract.get("metrics")
+            metrics=contract.get("metrics"),
         )
 
         return response

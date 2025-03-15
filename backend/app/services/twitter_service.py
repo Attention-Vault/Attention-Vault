@@ -6,6 +6,7 @@ from app.core.config import settings
 from app.schemas.twitter import TweetMetrics
 from loguru import logger
 
+
 class TwitterService:
     """Service for interacting with the Twitter API."""
 
@@ -16,7 +17,7 @@ class TwitterService:
             consumer_key=settings.TWITTER_API_KEY,
             consumer_secret=settings.TWITTER_API_SECRET,
             access_token=settings.TWITTER_ACCESS_TOKEN,
-            access_token_secret=settings.TWITTER_ACCESS_SECRET
+            access_token_secret=settings.TWITTER_ACCESS_SECRET,
         )
 
     def get_tweet_metrics(self, tweet_ids: List[str]) -> List[TweetMetrics]:
@@ -35,10 +36,8 @@ class TwitterService:
             # Fetch tweets with public metrics
             tweets = self.client.get_tweets(
                 tweet_ids,
-                tweet_fields=[
-                    "created_at", "public_metrics", "text"
-                ],
-                expansions=["author_id"]
+                tweet_fields=["created_at", "public_metrics", "text"],
+                expansions=["author_id"],
             )
 
             if not tweets.data:
@@ -51,12 +50,14 @@ class TwitterService:
                         tweet_id=tweet.id,
                         text=tweet.text,
                         created_at=tweet.created_at,
-                        impression_count=getattr(tweet.public_metrics, "impression_count", 0),
+                        impression_count=getattr(
+                            tweet.public_metrics, "impression_count", 0
+                        ),
                         like_count=getattr(tweet.public_metrics, "like_count", 0),
                         retweet_count=getattr(tweet.public_metrics, "retweet_count", 0),
                         reply_count=getattr(tweet.public_metrics, "reply_count", 0),
                         quote_count=getattr(tweet.public_metrics, "quote_count", 0),
-                        url=f"https://twitter.com/user/status/{tweet.id}"
+                        url=f"https://twitter.com/user/status/{tweet.id}",
                     )
                 )
 
@@ -81,7 +82,7 @@ class TwitterService:
             "likes": 0,
             "retweets": 0,
             "replies": 0,
-            "quotes": 0
+            "quotes": 0,
         }
 
         for metric in metrics:
@@ -105,7 +106,7 @@ class TwitterService:
         """
         try:
             # Remove @ if present
-            handle = twitter_handle.strip('@').strip()
+            handle = twitter_handle.strip("@").strip()
 
             # Query the Twitter API to check if the user exists
             user = self.client.get_user(username=handle)
@@ -128,8 +129,8 @@ class TwitterService:
         # Match patterns like https://twitter.com/username/status/1234567890
         # or https://x.com/username/status/1234567890
         twitter_patterns = [
-            r'twitter\.com/\w+/status/(\d+)',
-            r'x\.com/\w+/status/(\d+)'
+            r"twitter\.com/\w+/status/(\d+)",
+            r"x\.com/\w+/status/(\d+)",
         ]
 
         for pattern in twitter_patterns:
@@ -160,7 +161,7 @@ class TwitterService:
             tweet = self.client.get_tweet(
                 tweet_id,
                 tweet_fields=["created_at", "public_metrics", "text"],
-                expansions=["author_id"]
+                expansions=["author_id"],
             )
 
             if not tweet.data:
@@ -187,7 +188,11 @@ class TwitterService:
                 "author_handle": author_handle,
                 "text": tweet.data.text,
                 "created_at": tweet.data.created_at,
-                "public_metrics": tweet.data.public_metrics._json if hasattr(tweet.data.public_metrics, "_json") else vars(tweet.data.public_metrics)
+                "public_metrics": (
+                    tweet.data.public_metrics._json
+                    if hasattr(tweet.data.public_metrics, "_json")
+                    else vars(tweet.data.public_metrics)
+                ),
             }
 
         except tweepy.TweepyException as e:
@@ -223,15 +228,17 @@ class TwitterService:
                 "reply_count": metrics.get("reply_count", 0),
                 "quote_count": metrics.get("quote_count", 0),
                 "impression_count": metrics.get("impression_count", 0),
-                "retrieved_at": datetime.utcnow().isoformat()
+                "retrieved_at": datetime.utcnow().isoformat(),
             }
 
         except Exception as e:
             logger.error(f"Error getting metrics for Twitter URL {url}: {str(e)}")
             return None
 
+
 # Create a singleton instance of the TwitterService
 twitter_service = TwitterService()
+
 
 # Create helper functions to use the singleton
 async def validate_twitter_handle(twitter_handle: str) -> bool:
@@ -246,6 +253,7 @@ async def validate_twitter_handle(twitter_handle: str) -> bool:
     """
     return twitter_service.validate_handle(twitter_handle)
 
+
 async def validate_post_url(url: str) -> Optional[Dict[str, Any]]:
     """
     Validate a Twitter post URL and extract information from it.
@@ -257,6 +265,7 @@ async def validate_post_url(url: str) -> Optional[Dict[str, Any]]:
         Dict containing post information or None if invalid
     """
     return await twitter_service.validate_post_url(url)
+
 
 async def get_post_metrics(url: str) -> Optional[Dict[str, Any]]:
     """
