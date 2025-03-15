@@ -14,28 +14,11 @@ export interface Cluster {
 }
 
 export enum ClusterNetwork {
-  Mainnet = "mainnet-beta",
-  Testnet = "testnet",
-  Devnet = "devnet",
-  Custom = "custom",
   SonicDevnet = "sonic-devnet",
 }
 
-// By default, we don't configure the mainnet-beta cluster
-// The endpoint provided by clusterApiUrl('mainnet-beta') does not allow access from the browser due to CORS restrictions
-// To use the mainnet-beta cluster, provide a custom endpoint
+// By default, we only configure the sonic-devnet cluster
 export const defaultClusters: Cluster[] = [
-  {
-    name: "devnet",
-    endpoint: clusterApiUrl("devnet"),
-    network: ClusterNetwork.Devnet,
-  },
-  { name: "local", endpoint: "http://localhost:8899" },
-  {
-    name: "testnet",
-    endpoint: clusterApiUrl("testnet"),
-    network: ClusterNetwork.Testnet,
-  },
   {
     name: "sonic-devnet",
     endpoint: "https://api.testnet.sonic.game",
@@ -70,8 +53,6 @@ const activeClusterAtom = atom<Cluster>((get) => {
 export interface ClusterProviderContext {
   cluster: Cluster;
   clusters: Cluster[];
-  addCluster: (cluster: Cluster) => void;
-  deleteCluster: (cluster: Cluster) => void;
   setCluster: (cluster: Cluster) => void;
   getExplorerUrl(path: string): string;
 }
@@ -86,51 +67,30 @@ export function ClusterProvider({ children }: { children: ReactNode }) {
   const setCluster = useSetAtom(clusterAtom);
   const setClusters = useSetAtom(clustersAtom);
 
-  // Ensure sonic-devnet is always present in clusters
+  // Force only sonic-devnet cluster
   useEffect(() => {
-    const sonicDevnet = clusters.find(
-      (c) => c.network === ClusterNetwork.SonicDevnet
-    );
-    if (!sonicDevnet) {
-      console.log("Restoring sonic-devnet cluster...");
-      const defaultSonicDevnet = defaultClusters.find(
-        (c) => c.network === ClusterNetwork.SonicDevnet
-      );
-      if (defaultSonicDevnet) {
-        setClusters([...clusters, defaultSonicDevnet]);
-      }
+    if (
+      clusters.length !== 1 ||
+      clusters[0].network !== ClusterNetwork.SonicDevnet
+    ) {
+      console.log("Resetting to sonic-devnet only...");
+      setClusters(defaultClusters);
+      setCluster(defaultClusters[0]);
     }
-  }, [clusters, setClusters]);
+  }, [clusters, setClusters, setCluster]);
 
   console.log("Current cluster:", cluster);
   console.log("Available clusters:", clusters);
 
   const value: ClusterProviderContext = {
     cluster,
-    clusters: clusters.sort((a, b) => (a.name > b.name ? 1 : -1)),
-    addCluster: (cluster: Cluster) => {
-      try {
-        console.log("Adding cluster:", cluster);
-        new Connection(cluster.endpoint);
-        setClusters([...clusters, cluster]);
-      } catch (err) {
-        console.error("Error adding cluster:", err);
-        toast.error(`${err}`);
-      }
-    },
-    deleteCluster: (cluster: Cluster) => {
-      // Prevent deletion of sonic-devnet
-      if (cluster.network === ClusterNetwork.SonicDevnet) {
-        console.log("Cannot delete sonic-devnet cluster");
-        toast.error("Cannot delete sonic-devnet cluster");
-        return;
-      }
-      console.log("Deleting cluster:", cluster);
-      setClusters(clusters.filter((item) => item.name !== cluster.name));
-    },
+    clusters: [defaultClusters[0]], // Only return sonic-devnet
     setCluster: (cluster: Cluster) => {
-      console.log("Setting active cluster:", cluster);
-      setCluster(cluster);
+      // Only allow setting to sonic-devnet
+      if (cluster.network === ClusterNetwork.SonicDevnet) {
+        console.log("Setting active cluster:", cluster);
+        setCluster(cluster);
+      }
     },
     getExplorerUrl: (path: string) =>
       `https://explorer.sonic.game/${path}${getClusterUrlParam(cluster)}`,
@@ -145,15 +105,6 @@ export function useCluster() {
 function getClusterUrlParam(cluster: Cluster): string {
   let suffix = "";
   switch (cluster.network) {
-    case ClusterNetwork.Devnet:
-      suffix = "devnet";
-      break;
-    case ClusterNetwork.Mainnet:
-      suffix = "";
-      break;
-    case ClusterNetwork.Testnet:
-      suffix = "testnet";
-      break;
     case ClusterNetwork.SonicDevnet:
       suffix = "sonic-devnet";
       break;
