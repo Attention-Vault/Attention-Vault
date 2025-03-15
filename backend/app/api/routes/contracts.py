@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pydantic import BaseModel, HttpUrl
+from pydantic import BaseModel, HttpUrl, validator, Field
 from typing import Dict, Any, Optional, List
 from app.services.solana_service import validate_contract_address, distribute_tranche
 from app.services.twitter_service import (
@@ -22,6 +22,16 @@ class NewContractRequest(BaseModel):
     contract_address: str
     verification_text: str
     twitter_handle: str
+    number_of_tranches: int = Field(..., gt=0, description="Number of tranches for the contract")
+    tranche_distribution: List[int] = Field(..., description="Distribution values for each tranche")
+
+    @validator('tranche_distribution')
+    def validate_tranche_distribution(cls, v, values):
+        if 'number_of_tranches' in values and len(v) != values['number_of_tranches']:
+            raise ValueError('tranche_distribution length must match number_of_tranches')
+        if any(value <= 0 for value in v):
+            raise ValueError('All tranche distribution values must be greater than 0')
+        return v
 
 
 class ClaimRequest(BaseModel):
@@ -44,6 +54,8 @@ class ContractInfoResponse(BaseModel):
     status: str
     tranches_distributed: Optional[int] = 0
     metrics: Optional[Dict[str, Any]] = None
+    number_of_tranches: int
+    tranche_distribution: List[int]
 
 
 @router.post("/new_contract", response_model=ContractResponse)
@@ -55,6 +67,7 @@ async def create_new_contract(contract_data: NewContractRequest):
     1. Contract address exists on Solana testnet
     2. Text is parseable by an LLM
     3. Twitter handle exists
+    4. Number of tranches matches tranche distribution list length
 
     Then stores the data in MongoDB
     """
@@ -71,8 +84,21 @@ async def create_new_contract(contract_data: NewContractRequest):
         if not await validate_twitter_handle(contract_data.twitter_handle):
             return ContractResponse(success=False, message="Invalid Twitter handle")
 
+        # Validate tranche distribution
+        if len(contract_data.tranche_distribution) != contract_data.number_of_tranches:
+            return ContractResponse(
+                success=False,
+                message="Tranche distribution length must match number of tranches",
+            )
+        if any(value <= 0 for value in contract_data.tranche_distribution):
+            return ContractResponse(
+                success=False,
+                message="All tranche distribution values must be greater than 0",
+            )
+
         # Store data in MongoDB
-        success, reason = await store_contract_data(contract_data.dict())
+        contract_dict = contract_data.dict()
+        success, reason = await store_contract_data(contract_dict)
         if not success:
             if reason == "already_exists":
                 return ContractResponse(
@@ -152,21 +178,23 @@ async def claim_contract(claim_data: ClaimRequest):
                 success=False, message="Failed to retrieve post metrics"
             )
 
-        # Get tranche thresholds from the contract on Solana
-        tranche_info = await validate_contract_address(
-            claim_data.contract_address, get_tranches=True
-        )
-        if not tranche_info or "tranches" not in tranche_info:
+        # Use the custom tranche distribution specified in the contract
+        number_of_tranches = contract.get("number_of_tranches", 0)
+        tranche_distribution = contract.get("tranche_distribution", [])
+
+        if not number_of_tranches or not tranche_distribution:
             return ContractResponse(
-                success=False, message="Failed to retrieve tranche information"
+                success=False,
+                message="Contract does not have valid tranche configuration",
+                reason="invalid_tranches"
             )
 
         # Calculate how many tranches the post qualifies for based on likes
         qualified_tranches = 0
         like_count = metrics.get("like_count", 0)
 
-        for tranche in tranche_info["tranches"]:
-            if like_count >= tranche["threshold"]:
+        for i, threshold in enumerate(tranche_distribution):
+            if like_count >= threshold:
                 qualified_tranches += 1
 
         if qualified_tranches == 0:
@@ -231,6 +259,8 @@ async def get_contract_info(contract_address: str):
             post_url=contract.get("post_url"),
             tranches_distributed=contract.get("tranches_distributed", 0),
             metrics=contract.get("metrics"),
+            number_of_tranches=contract.get("number_of_tranches", 0),
+            tranche_distribution=contract.get("tranche_distribution", [])
         )
 
         return response
