@@ -13,6 +13,8 @@ dependencies = [
     "httpx>=0.24.1",
     "loguru>=0.7.3",
     "motor>=3.7.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.25.3",
 ]
 
 [project.optional-dependencies]
