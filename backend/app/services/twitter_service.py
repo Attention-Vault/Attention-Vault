@@ -1,10 +1,9 @@
 import tweepy
 from typing import Dict, List, Optional, Union
 from datetime import datetime, date
-
 from app.core.config import settings
 from app.schemas.twitter import TweetMetrics
-
+from loguru import logger
 
 class TwitterService:
     """Service for interacting with the Twitter API."""
@@ -92,3 +91,41 @@ class TwitterService:
             totals["quotes"] += metric.quote_count
 
         return totals
+
+    def validate_handle(self, twitter_handle: str) -> bool:
+        """
+        Validate that a Twitter handle exists.
+
+        Args:
+            twitter_handle: The Twitter username to validate (with or without @)
+
+        Returns:
+            bool: True if the handle exists, False otherwise
+        """
+        try:
+            # Remove @ if present
+            handle = twitter_handle.strip('@').strip()
+
+            # Query the Twitter API to check if the user exists
+            user = self.client.get_user(username=handle)
+            return user is not None
+
+        except tweepy.TweepyException as e:
+            logger.error(f"Error validating Twitter handle {twitter_handle}: {str(e)}")
+            return False
+
+# Create a singleton instance of the TwitterService
+twitter_service = TwitterService()
+
+# Create a helper function to use the singleton
+async def validate_twitter_handle(twitter_handle: str) -> bool:
+    """
+    Async wrapper for validating Twitter handles.
+
+    Args:
+        twitter_handle: The Twitter handle to validate
+
+    Returns:
+        bool: True if the handle exists, False otherwise
+    """
+    return twitter_service.validate_handle(twitter_handle)
