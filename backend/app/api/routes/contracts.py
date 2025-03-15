@@ -21,6 +21,7 @@ class ClaimRequest(BaseModel):
 class ContractResponse(BaseModel):
     success: bool
     message: str
+    reason: Optional[str] = None
 
 class ContractInfoResponse(BaseModel):
     contract_address: str
@@ -58,8 +59,15 @@ async def create_new_contract(contract_data: NewContractRequest):
             return ContractResponse(success=False, message="Invalid Twitter handle")
 
         # Store data in MongoDB
-        if not await store_contract_data(contract_data.dict()):
-            return ContractResponse(success=False, message="Failed to store contract data")
+        success, reason = await store_contract_data(contract_data.dict())
+        if not success:
+            if reason == "already_exists":
+                return ContractResponse(
+                    success=False,
+                    message=f"Contract with address {contract_data.contract_address} already exists",
+                    reason=reason
+                )
+            return ContractResponse(success=False, message="Failed to store contract data", reason=reason)
 
         return ContractResponse(success=True, message="Contract created successfully")
 
@@ -89,7 +97,7 @@ async def claim_contract(claim_data: ClaimRequest):
 
         # Check if contract is already claimed
         if contract.get("status") == "claimed":
-            return ContractResponse(success=False, message="Contract has already been claimed")
+            return ContractResponse(success=False, message="Contract has already been claimed", reason="already_claimed")
 
         # Get contract details
         twitter_handle = contract["twitter_handle"]
@@ -104,7 +112,8 @@ async def claim_contract(claim_data: ClaimRequest):
         if post_info["author_handle"].lower() != twitter_handle.lower().strip('@'):
             return ContractResponse(
                 success=False,
-                message=f"Post not authored by the expected influencer: {twitter_handle}"
+                message=f"Post not authored by the expected influencer: {twitter_handle}",
+                reason="wrong_author"
             )
 
         # Verify post content against verification text requirements using LLM
@@ -112,7 +121,8 @@ async def claim_contract(claim_data: ClaimRequest):
         if not content_valid:
             return ContractResponse(
                 success=False,
-                message="Post content does not match verification requirements"
+                message="Post content does not match verification requirements",
+                reason="content_mismatch"
             )
 
         # Get post metrics
@@ -137,7 +147,8 @@ async def claim_contract(claim_data: ClaimRequest):
             return ContractResponse(
                 success=False,
                 message=f"Post does not have enough likes to qualify for any tranche. "
-                        f"Current likes: {like_count}"
+                        f"Current likes: {like_count}",
+                reason="insufficient_likes"
             )
 
         # Call distribute_tranche for each qualified tranche

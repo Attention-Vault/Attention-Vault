@@ -1,5 +1,5 @@
 import motor.motor_asyncio
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 from loguru import logger
 import os
 from datetime import datetime
@@ -12,7 +12,7 @@ DB_NAME = os.getenv("MONGO_DB_NAME", "attention_vault")
 client = motor.motor_asyncio.AsyncIOMotorClient(MONGO_URI)
 db = client[DB_NAME]
 
-async def store_contract_data(contract_data: Dict[str, Any]) -> bool:
+async def store_contract_data(contract_data: Dict[str, Any]) -> Tuple[bool, Optional[str]]:
     """
     Store contract data in MongoDB.
 
@@ -20,9 +20,23 @@ async def store_contract_data(contract_data: Dict[str, Any]) -> bool:
         contract_data: Dictionary containing contract details
 
     Returns:
-        bool: True if storage was successful, False otherwise
+        Tuple[bool, Optional[str]]: (success, reason)
+        - success: True if storage was successful or already exists, False otherwise
+        - reason: Reason for failure or "already_exists" if the contract already exists
     """
     try:
+        # Check if a contract with this address already exists
+        contract_address = contract_data.get("contract_address")
+        if not contract_address:
+            logger.error("Contract address is missing in the contract data")
+            return False, "missing_contract_address"
+
+        # Look up existing contract
+        existing_contract = await db.contracts.find_one({"contract_address": contract_address})
+        if existing_contract:
+            logger.info(f"Contract with address {contract_address} already exists, skipping insertion")
+            return False, "already_exists"
+
         # Add timestamp for when the contract was created
         contract_data["created_at"] = datetime.utcnow()
 
@@ -35,14 +49,14 @@ async def store_contract_data(contract_data: Dict[str, Any]) -> bool:
         # Check if insertion was successful
         if result.inserted_id:
             logger.info(f"Contract stored successfully with ID: {result.inserted_id}")
-            return True
+            return True, None
         else:
             logger.error("Failed to store contract data")
-            return False
+            return False, "insertion_failed"
 
     except Exception as e:
         logger.error(f"Database error while storing contract: {str(e)}")
-        return False
+        return False, f"database_error: {str(e)}"
 
 async def get_contract(contract_address: str) -> Optional[Dict[str, Any]]:
     """
@@ -63,7 +77,7 @@ async def get_contract(contract_address: str) -> Optional[Dict[str, Any]]:
         return None
 
 async def update_contract_with_post(
-    contract_address: str, 
+    contract_address: str,
     update_data: Dict[str, Any]
 ) -> bool:
     """
