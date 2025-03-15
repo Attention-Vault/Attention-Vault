@@ -3,7 +3,7 @@
 import { clusterApiUrl, Connection } from "@solana/web3.js";
 import { atom, useAtomValue, useSetAtom } from "jotai";
 import { atomWithStorage } from "jotai/utils";
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useEffect } from "react";
 import toast from "react-hot-toast";
 
 export interface Cluster {
@@ -18,6 +18,7 @@ export enum ClusterNetwork {
   Testnet = "testnet",
   Devnet = "devnet",
   Custom = "custom",
+  SonicDevnet = "sonic-devnet",
 }
 
 // By default, we don't configure the mainnet-beta cluster
@@ -34,6 +35,11 @@ export const defaultClusters: Cluster[] = [
     name: "testnet",
     endpoint: clusterApiUrl("testnet"),
     network: ClusterNetwork.Testnet,
+  },
+  {
+    name: "sonic-devnet",
+    endpoint: "https://api.testnet.sonic.game",
+    network: ClusterNetwork.SonicDevnet,
   },
 ];
 
@@ -80,21 +86,52 @@ export function ClusterProvider({ children }: { children: ReactNode }) {
   const setCluster = useSetAtom(clusterAtom);
   const setClusters = useSetAtom(clustersAtom);
 
+  // Ensure sonic-devnet is always present in clusters
+  useEffect(() => {
+    const sonicDevnet = clusters.find(
+      (c) => c.network === ClusterNetwork.SonicDevnet
+    );
+    if (!sonicDevnet) {
+      console.log("Restoring sonic-devnet cluster...");
+      const defaultSonicDevnet = defaultClusters.find(
+        (c) => c.network === ClusterNetwork.SonicDevnet
+      );
+      if (defaultSonicDevnet) {
+        setClusters([...clusters, defaultSonicDevnet]);
+      }
+    }
+  }, [clusters, setClusters]);
+
+  console.log("Current cluster:", cluster);
+  console.log("Available clusters:", clusters);
+
   const value: ClusterProviderContext = {
     cluster,
     clusters: clusters.sort((a, b) => (a.name > b.name ? 1 : -1)),
     addCluster: (cluster: Cluster) => {
       try {
+        console.log("Adding cluster:", cluster);
         new Connection(cluster.endpoint);
         setClusters([...clusters, cluster]);
       } catch (err) {
+        console.error("Error adding cluster:", err);
         toast.error(`${err}`);
       }
     },
     deleteCluster: (cluster: Cluster) => {
+      // Prevent deletion of sonic-devnet
+      if (cluster.network === ClusterNetwork.SonicDevnet) {
+        console.log("Cannot delete sonic-devnet cluster");
+        toast.error("Cannot delete sonic-devnet cluster");
+        return;
+      }
+      console.log("Deleting cluster:", cluster);
       setClusters(clusters.filter((item) => item.name !== cluster.name));
     },
-    setCluster: (cluster: Cluster) => setCluster(cluster),
+    setCluster: (cluster: Cluster) => {
+      console.log("Setting active cluster:", cluster);
+      setCluster(cluster);
+    },
     getExplorerUrl: (path: string) =>
       `https://explorer.sonic.game/${path}${getClusterUrlParam(cluster)}`,
   };
@@ -116,6 +153,9 @@ function getClusterUrlParam(cluster: Cluster): string {
       break;
     case ClusterNetwork.Testnet:
       suffix = "testnet";
+      break;
+    case ClusterNetwork.SonicDevnet:
+      suffix = "sonic-devnet";
       break;
     default:
       suffix = `custom&customUrl=${encodeURIComponent(cluster.endpoint)}`;
