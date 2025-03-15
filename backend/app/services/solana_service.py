@@ -5,7 +5,7 @@ from typing import Dict, Any, Optional, List
 from loguru import logger
 
 # Solana testnet RPC URL
-SOLANA_TESTNET_RPC = "https://api.testnet.solana.com"
+SOLANA_TESTNET_RPC = "https://api.testnet.sonic.game"
 
 # Wallet secret for distributing tranches (in production, use secure storage)
 WALLET_SECRET = os.getenv("SOLANA_WALLET_SECRET", "")
