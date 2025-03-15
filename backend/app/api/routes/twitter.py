@@ -15,7 +15,7 @@ def get_twitter_service():
 @router.post("/metrics", response_model=MetricsResponse)
 async def verify_tweet_metrics(
     request: MetricsRequest,
-    twitter_service: TwitterService = Depends(get_twitter_service)
+    twitter_service: TwitterService = Depends(get_twitter_service),
 ):
     """
     Verify tweet performance metrics (impressions, engagement, etc.)
@@ -25,10 +25,7 @@ async def verify_tweet_metrics(
     """
     # Check if we have tweet IDs to analyze
     if not request.tweet_ids:
-        return MetricsResponse(
-            success=False,
-            message="No tweet IDs provided"
-        )
+        return MetricsResponse(success=False, message="No tweet IDs provided")
 
     try:
         # Get metrics for each tweet
@@ -36,8 +33,7 @@ async def verify_tweet_metrics(
 
         if not metrics:
             return MetricsResponse(
-                success=False,
-                message="No metrics found for the provided tweet IDs"
+                success=False, message="No metrics found for the provided tweet IDs"
             )
 
         # Calculate total metrics across all tweets
@@ -47,7 +43,7 @@ async def verify_tweet_metrics(
             success=True,
             message=f"Successfully retrieved metrics for {len(metrics)} tweets",
             metrics=metrics,
-            total_metrics=total_metrics
+            total_metrics=total_metrics,
         )
 
     except Exception as e:
@@ -56,5 +52,5 @@ async def verify_tweet_metrics(
 
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to verify tweet metrics: {str(e)}"
+            detail=f"Failed to verify tweet metrics: {str(e)}",
         )

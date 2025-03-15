@@ -11,6 +11,14 @@ dependencies = [
     "python-dotenv>=1.0.0",
     "pydantic>=2.3.0",
     "httpx>=0.24.1",
+    "loguru>=0.7.3",
+    "motor>=3.7.0",
+    "pytest>=8.3.5",
+    "pytest-asyncio>=0.25.3",
+    "solana>=0.36.6",
+    "solders>=0.26.0",
+    "base58>=2.1.1",
+    "black>=25.1.0",
 ]
 
 [project.optional-dependencies]

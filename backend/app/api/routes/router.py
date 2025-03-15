@@ -1,9 +1,8 @@
 from fastapi import APIRouter
-
-from app.api.routes import twitter
+from app.api.routes import contracts
 
 # Create main API router
 api_router = APIRouter()
 
-# Include all route modules
-api_router.include_router(twitter.router, prefix="/verify/twitter", tags=["Twitter Verification"])
+# Include contract routes
+api_router.include_router(contracts.router, tags=["Contract Operations"])
