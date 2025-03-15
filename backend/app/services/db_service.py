@@ -14,7 +14,7 @@ db = client[DB_NAME]
 
 
 async def store_contract_data(
-    contract_data: Dict[str, Any]
+    contract_data: Dict[str, Any],
 ) -> Tuple[bool, Optional[str]]:
     """
     Store contract data in MongoDB.
