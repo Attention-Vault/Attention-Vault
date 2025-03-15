@@ -9,29 +9,33 @@ export default function DashboardFeature() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <div className="w-full bg-gradient-to-r from-base-200 to-base-100 border-b border-base-300">
-        <div className="w-full max-w-[1400px] mx-auto px-6 py-10">
-          <div className="text-center max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="bg-gradient-to-r from-primary to-accent text-transparent bg-clip-text">
+      <div className="w-full bg-gradient-to-br from-base-200 via-base-100 to-base-300 relative overflow-hidden">
+        <div className="absolute inset-0 bg-grid-white/[0.05] bg-[size:16px_16px]" />
+        <div className="absolute h-full w-full bg-gradient-to-r from-transparent via-base-200/50 to-transparent blur-3xl" />
+        <div className="w-full max-w-[1400px] mx-auto px-6 py-16 relative">
+          <div className="text-center max-w-4xl mx-auto">
+            <h1 className="text-5xl md:text-7xl font-bold mt-8 mb-8 leading-tight tracking-tight">
+              <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient bg-clip-text text-transparent">
                 Attention Vault
               </span>
             </h1>
-            <p className="text-xl text-base-content/80 mb-8 leading-relaxed">
+            <p className="text-xl md:text-2xl text-base-content/70 mb-12 leading-relaxed max-w-3xl mx-auto">
               Revolutionizing influencer partnerships with autonomous, smart
               contract-powered payouts. Secure, transparent, and efficient.
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
               <button
                 onClick={() => router.push("/company")}
-                className="btn btn-primary"
+                className="btn btn-primary btn-lg group relative overflow-hidden px-8"
               >
+                <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                 Launch Company Dashboard
               </button>
               <button
                 onClick={() => router.push("/company")}
-                className="btn btn-accent"
+                className="btn btn-accent btn-lg group relative overflow-hidden px-8"
               >
+                <span className="absolute inset-0 bg-gradient-to-r from-accent/0 via-white/20 to-accent/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                 View Influencer Dashboard
               </button>
             </div>
@@ -40,20 +44,21 @@ export default function DashboardFeature() {
       </div>
 
       {/* Features Section */}
-      <div className="w-full bg-base-100">
-        <div className="w-full max-w-[1400px] mx-auto px-6 py-16">
-          <h2 className="text-3xl font-bold text-center mb-12">
+      <div className="w-full bg-base-100 relative overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_500px_at_50%_200px,rgba(var(--primary-rgb),0.1),transparent)]" />
+        <div className="w-full max-w-[1400px] mx-auto px-6 py-24 relative">
+          <h2 className="text-4xl font-bold text-center mb-16">
             Choose Your Dashboard
           </h2>
-          <div className="grid md:grid-cols-2 gap-8">
+          <div className="grid md:grid-cols-2 gap-12">
             {/* For Companies */}
-            <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-all">
-              <div className="card-body">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-lg bg-primary/10 flex items-center justify-center">
+            <div className="card bg-gradient-to-br from-base-200 to-base-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 backdrop-blur-xl border border-base-content/5">
+              <div className="card-body p-10">
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center backdrop-blur-xl">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-primary"
+                      className="h-8 w-8 text-primary"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -66,14 +71,14 @@ export default function DashboardFeature() {
                       />
                     </svg>
                   </div>
-                  <h2 className="card-title text-2xl">For Companies</h2>
+                  <h2 className="card-title text-3xl">For Companies</h2>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 backdrop-blur-xl">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-primary"
+                        className="h-5 w-5 text-primary"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -86,13 +91,15 @@ export default function DashboardFeature() {
                         />
                       </svg>
                     </div>
-                    <p>Automate influencer payments with smart contracts</p>
+                    <p className="text-lg">
+                      Automate influencer payments with smart contracts
+                    </p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 backdrop-blur-xl">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-primary"
+                        className="h-5 w-5 text-primary"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -105,13 +112,13 @@ export default function DashboardFeature() {
                         />
                       </svg>
                     </div>
-                    <p>Set performance-based milestones</p>
+                    <p className="text-lg">Set performance-based milestones</p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 backdrop-blur-xl">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-primary"
+                        className="h-5 w-5 text-primary"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -124,14 +131,17 @@ export default function DashboardFeature() {
                         />
                       </svg>
                     </div>
-                    <p>Track campaign progress in real-time</p>
+                    <p className="text-lg">
+                      Track campaign progress in real-time
+                    </p>
                   </div>
                 </div>
-                <div className="card-actions justify-end mt-6">
+                <div className="card-actions justify-end mt-10">
                   <button
                     onClick={() => router.push("/company")}
-                    className="btn btn-primary"
+                    className="btn btn-primary btn-lg group relative overflow-hidden px-8"
                   >
+                    <span className="absolute inset-0 bg-gradient-to-r from-primary/0 via-white/20 to-primary/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                     Launch Company Dashboard
                   </button>
                 </div>
@@ -139,13 +149,13 @@ export default function DashboardFeature() {
             </div>
 
             {/* For Influencers */}
-            <div className="card bg-base-200 shadow-xl hover:shadow-2xl transition-all">
-              <div className="card-body">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-lg bg-accent/10 flex items-center justify-center">
+            <div className="card bg-gradient-to-br from-base-200 to-base-300 shadow-xl hover:shadow-2xl hover:scale-[1.02] transition-all duration-300 backdrop-blur-xl border border-base-content/5">
+              <div className="card-body p-10">
+                <div className="flex items-center gap-6 mb-8">
+                  <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center backdrop-blur-xl">
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
-                      className="h-6 w-6 text-accent"
+                      className="h-8 w-8 text-accent"
                       fill="none"
                       viewBox="0 0 24 24"
                       stroke="currentColor"
@@ -158,14 +168,14 @@ export default function DashboardFeature() {
                       />
                     </svg>
                   </div>
-                  <h2 className="card-title text-2xl">For Influencers</h2>
+                  <h2 className="card-title text-3xl">For Influencers</h2>
                 </div>
-                <div className="space-y-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                <div className="space-y-6">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 backdrop-blur-xl">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-accent"
+                        className="h-5 w-5 text-accent"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -178,13 +188,15 @@ export default function DashboardFeature() {
                         />
                       </svg>
                     </div>
-                    <p>Receive automatic payments upon reaching goals</p>
+                    <p className="text-lg">
+                      Receive automatic payments upon reaching goals
+                    </p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 backdrop-blur-xl">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-accent"
+                        className="h-5 w-5 text-accent"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -197,13 +209,15 @@ export default function DashboardFeature() {
                         />
                       </svg>
                     </div>
-                    <p>Monitor your earnings and milestones</p>
+                    <p className="text-lg">
+                      Monitor your earnings and milestones
+                    </p>
                   </div>
-                  <div className="flex items-start gap-3">
-                    <div className="w-6 h-6 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <div className="flex items-start gap-4">
+                    <div className="w-8 h-8 rounded-full bg-accent/10 flex items-center justify-center flex-shrink-0 backdrop-blur-xl">
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
-                        className="h-4 w-4 text-accent"
+                        className="h-5 w-5 text-accent"
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -216,14 +230,17 @@ export default function DashboardFeature() {
                         />
                       </svg>
                     </div>
-                    <p>Transparent and secure payment system</p>
+                    <p className="text-lg">
+                      Transparent and secure payment system
+                    </p>
                   </div>
                 </div>
-                <div className="card-actions justify-end mt-6">
+                <div className="card-actions justify-end mt-10">
                   <button
                     onClick={() => router.push("/company")}
-                    className="btn btn-accent"
+                    className="btn btn-accent btn-lg group relative overflow-hidden px-8"
                   >
+                    <span className="absolute inset-0 bg-gradient-to-r from-accent/0 via-white/20 to-accent/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                     View Influencer Dashboard
                   </button>
                 </div>
@@ -233,24 +250,47 @@ export default function DashboardFeature() {
         </div>
       </div>
 
-      {/* Connect Wallet Section */}
-      <div
-        className="w-full bg-base-200 border-t border-base-300"
-        style={{
-          marginTop: "100px",
-        }}
-      >
-        <div className="w-full max-w-[1400px] mx-auto px-6 py-12">
-          <div className="max-w-3xl mx-auto text-center">
-            <h2 className="text-2xl font-bold mb-4">Ready to Get Started?</h2>
-            <p className="text-base-content/70 mb-6">
-              Connect your wallet to start creating contracts or managing your
-              earnings
-            </p>
-            <WalletButton />
+      {/* Footer Section */}
+      <footer className="w-full bg-base-200 border-t border-base-300">
+        <div className="w-full max-w-[1400px] mx-auto px-6 py-6">
+          <div className="flex flex-col items-center gap-6">
+            <a
+              href="https://twitter.com/AttentionVault"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-circle btn-ghost"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+              </svg>
+            </a>
+            <div className="flex flex-col md:flex-row justify-center items-center gap-4 text-center">
+              <p className="text-sm text-base-content/70">
+                © {new Date().getFullYear()} Attention Vault. All rights
+                reserved.
+              </p>
+              <span className="hidden md:inline text-base-content/70">•</span>
+              <p className="text-sm text-base-content/70">
+                Built with{" "}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                  className="w-4 h-4 inline-block align-text-bottom"
+                >
+                  <path d="M11.645 20.91l-.007-.003-.022-.012a15.247 15.247 0 01-.383-.218 25.18 25.18 0 01-4.244-3.17C4.688 15.36 2.25 12.174 2.25 8.25 2.25 5.322 4.714 3 7.688 3A5.5 5.5 0 0112 5.052 5.5 5.5 0 0116.313 3c2.973 0 5.437 2.322 5.437 5.25 0 3.925-2.438 7.111-4.739 9.256a25.175 25.175 0 01-4.244 3.17 15.247 15.247 0 01-.383.219l-.022.012-.007.004-.003.001a.752.752 0 01-.704 0l-.003-.001z" />
+                </svg>{" "}
+                for the Sonic SVM community
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

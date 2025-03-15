@@ -22,19 +22,27 @@ export function UiLayout({
   links: { label: string; path: string }[];
 }) {
   const pathname = usePathname();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   return (
     <div className="min-h-screen flex flex-col">
-      <div className="navbar bg-base-300 dark:text-neutral-content flex-col md:flex-row space-y-2 md:space-y-0">
-        <div className="flex-1">
+      <div className="navbar bg-base-300 dark:text-neutral-content px-4">
+        {/* Logo */}
+        <div className="flex-1 lg:flex-none">
           <Link className="btn btn-ghost normal-case text-xl" href="/">
             Attention Vault
           </Link>
-          <ul className="menu menu-horizontal px-1 space-x-2">
+        </div>
+
+        {/* Desktop Navigation - Centered */}
+        <div className="hidden lg:flex flex-1 justify-center">
+          <ul className="menu menu-horizontal px-1 space-x-4">
             {links.map(({ label, path }) => (
               <li key={path}>
                 <Link
-                  className={pathname.startsWith(path) ? "active" : ""}
+                  className={`text-lg font-medium ${
+                    pathname.startsWith(path) ? "text-primary" : ""
+                  }`}
                   href={path}
                 >
                   {label}
@@ -43,11 +51,99 @@ export function UiLayout({
             ))}
           </ul>
         </div>
-        <div className="flex-none space-x-2">
+
+        {/* Wallet and Mobile Navigation */}
+        <div className="flex gap-2 items-center">
+          {/* Always visible wallet button */}
           <WalletButton />
-          <ClusterUiSelect />
+
+          {/* Show Sonic SVM on desktop only */}
+          <div className="hidden lg:block">
+            <ClusterUiSelect />
+          </div>
+
+          {/* Mobile Menu Button */}
+          <div className="lg:hidden">
+            <button
+              className="btn btn-ghost btn-circle"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
+
+      {/* Mobile Navigation Menu - Shown as a drawer */}
+      <div
+        className={`lg:hidden fixed inset-0 z-50 transform ${
+          isMenuOpen ? "translate-x-0" : "translate-x-full"
+        } transition-transform duration-200 ease-in-out`}
+      >
+        <div
+          className="absolute inset-0 bg-black bg-opacity-50"
+          onClick={() => setIsMenuOpen(false)}
+        ></div>
+        <div className="absolute right-0 top-0 h-full w-64 bg-base-100 shadow-xl">
+          <div className="p-4 flex flex-col gap-4">
+            <div className="flex justify-between items-center">
+              <h2 className="text-lg font-bold">Menu</h2>
+              <button
+                className="btn btn-ghost btn-circle"
+                onClick={() => setIsMenuOpen(false)}
+              >
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-6 w-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+              </button>
+            </div>
+            {/* Show Sonic SVM in mobile sidebar */}
+            <div className="lg:hidden flex justify-center">
+              <ClusterUiSelect />
+            </div>
+            <ul className="menu menu-vertical w-full">
+              {links.map(({ label, path }) => (
+                <li key={path}>
+                  <Link
+                    className={
+                      pathname.startsWith(path) ? "active bg-base-300" : ""
+                    }
+                    href={path}
+                    onClick={() => setIsMenuOpen(false)}
+                  >
+                    {label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <ClusterChecker>
         <AccountChecker />
       </ClusterChecker>

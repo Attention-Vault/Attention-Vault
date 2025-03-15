@@ -7,13 +7,160 @@ body {
   height: 100%;
 }
 
-.wallet-adapter-button-trigger {
-  background: rgb(100, 26, 230) !important;
-  border-radius: 8px !important;
-  padding-left: 16px !important;
-  padding-right: 16px !important;
-}
-.wallet-adapter-dropdown-list,
+/* Wallet Button Styles */
 .wallet-adapter-button {
   font-family: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  position: relative !important;
+  text-align: center !important;
+  font-weight: 600 !important;
+}
+
+.wallet-adapter-button-trigger {
+  background: rgb(100, 26, 230) !important;
+  padding: 8px 12px !important;
+  border-radius: 8px !important;
+  color: white !important;
+  font-weight: 600 !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  font-size: 14px !important;
+  gap: 8px !important;
+  height: 36px !important;
+  justify-content: center !important;
+  outline: none !important;
+  user-select: none !important;
+}
+
+.wallet-adapter-button-trigger:hover {
+  background: rgb(86, 22, 198) !important;
+}
+
+.wallet-adapter-button-trigger:active {
+  background: rgb(72, 18, 166) !important;
+}
+
+.wallet-adapter-button img {
+  width: 20px !important;
+  height: 20px !important;
+}
+
+/* Wallet Dropdown Styles */
+.wallet-adapter-dropdown {
+  position: relative !important;
+  display: inline-block !important;
+}
+
+.wallet-adapter-dropdown-list {
+  position: absolute !important;
+  z-index: 99 !important;
+  display: grid !important;
+  grid-template-rows: 1fr !important;
+  grid-row-gap: 4px !important;
+  padding: 8px !important;
+  top: 100% !important;
+  right: 0 !important;
+  margin: 0 !important;
+  list-style: none !important;
+  background: hsl(var(--b1)) !important;
+  border-radius: 8px !important;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1) !important;
+  font-weight: 500 !important;
+  min-width: 240px !important;
+}
+
+.wallet-adapter-dropdown-list-item {
+  display: flex !important;
+  flex-direction: row !important;
+  justify-content: space-between !important;
+  align-items: center !important;
+  border: none !important;
+  border-radius: 4px !important;
+  cursor: pointer !important;
+  padding: 8px 16px !important;
+  color: inherit !important;
+  font-size: 14px !important;
+  line-height: 1.2 !important;
+  transition: background-color 200ms ease !important;
+}
+
+.wallet-adapter-dropdown-list-item:hover {
+  background-color: hsl(var(--b2)) !important;
+}
+
+@media (min-width: 640px) {
+  .wallet-adapter-button-trigger {
+    padding: 0.5rem 1rem !important;
+    font-size: 1rem !important;
+    height: 2.5rem !important;
+  }
+}
+
+@layer utilities {
+  .bg-grid-white {
+    background-image: url("data:image/svg+xml,%3Csvg width='16' height='16' viewBox='0 0 16 16' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0H16V16H0V0Z' fill='white'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0H1V16H0V0ZM4 0H5V16H4V0ZM8 0H9V16H8V0ZM12 0H13V16H12V0ZM16 0H17V16H16V0Z' fill='white' fill-opacity='0.1'/%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M0 0V1H16V0H0ZM0 4V5H16V4H0ZM0 8V9H16V8H0ZM0 12V13H16V12H0ZM0 16V17H16V16H0Z' fill='white' fill-opacity='0.1'/%3E%3C/svg%3E");
+  }
+}
+
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+
+@keyframes gradient {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+.animate-gradient {
+  animation: gradient 8s linear infinite;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: hsl(var(--b2));
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--p) / 0.3);
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--p) / 0.5);
+}
+
+/* Smooth transitions */
+* {
+  @apply transition-colors duration-200;
+}
+
+/* Custom selection color */
+::selection {
+  background: hsl(var(--p) / 0.2);
+  color: hsl(var(--pc));
 }

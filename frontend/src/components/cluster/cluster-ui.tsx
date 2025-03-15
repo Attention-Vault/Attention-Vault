@@ -92,17 +92,20 @@ export function ClusterUiSelect() {
   const { clusters, setCluster, cluster } = useCluster();
   return (
     <div className="dropdown dropdown-end">
-      <label tabIndex={0} className="btn btn-primary rounded-btn">
-        {cluster.name}
+      <label
+        tabIndex={0}
+        className="btn h-[36px] px-4 btn-primary rounded-lg text-sm font-semibold"
+      >
+        Sonic SVM
       </label>
       <ul
         tabIndex={0}
-        className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-52 mt-4"
+        className="menu dropdown-content z-[1] p-2 shadow bg-base-100 rounded-box w-40 sm:w-52 mt-2"
       >
         {clusters.map((item) => (
           <li key={item.name}>
             <button
-              className={`btn btn-sm ${
+              className={`btn btn-xs sm:btn-sm ${
                 item.active ? "btn-primary" : "btn-ghost"
               }`}
               onClick={() => setCluster(item)}
