@@ -1,5 +1,6 @@
 import tweepy
-from typing import Dict, List, Optional, Union
+import re
+from typing import Dict, List, Optional, Union, Any
 from datetime import datetime, date
 from app.core.config import settings
 from app.schemas.twitter import TweetMetrics
@@ -114,10 +115,125 @@ class TwitterService:
             logger.error(f"Error validating Twitter handle {twitter_handle}: {str(e)}")
             return False
 
+    def extract_tweet_id_from_url(self, url: str) -> Optional[str]:
+        """
+        Extract tweet ID from various forms of Twitter/X URLs.
+
+        Args:
+            url: Twitter post URL
+
+        Returns:
+            str: Tweet ID if found, None otherwise
+        """
+        # Match patterns like https://twitter.com/username/status/1234567890
+        # or https://x.com/username/status/1234567890
+        twitter_patterns = [
+            r'twitter\.com/\w+/status/(\d+)',
+            r'x\.com/\w+/status/(\d+)'
+        ]
+
+        for pattern in twitter_patterns:
+            match = re.search(pattern, url)
+            if match:
+                return match.group(1)
+
+        return None
+
+    async def validate_post_url(self, url: str) -> Optional[Dict[str, Any]]:
+        """
+        Validate a Twitter post URL and extract information from it.
+
+        Args:
+            url: Twitter post URL
+
+        Returns:
+            Dict containing post information or None if invalid
+        """
+        try:
+            # Extract tweet ID from URL
+            tweet_id = self.extract_tweet_id_from_url(url)
+            if not tweet_id:
+                logger.error(f"Invalid Twitter URL format: {url}")
+                return None
+
+            # Fetch tweet data
+            tweet = self.client.get_tweet(
+                tweet_id,
+                tweet_fields=["created_at", "public_metrics", "text"],
+                expansions=["author_id"]
+            )
+
+            if not tweet.data:
+                logger.error(f"Tweet not found: {url}")
+                return None
+
+            # Get author data
+            if tweet.includes and "users" in tweet.includes:
+                author = tweet.includes["users"][0]
+                author_handle = author.username
+            else:
+                # Fallback - get user from the tweet's author_id
+                author = self.client.get_user(id=tweet.data.author_id).data
+                author_handle = author.username if author else None
+
+            if not author_handle:
+                logger.error(f"Could not determine author of tweet: {url}")
+                return None
+
+            # Return tweet info
+            return {
+                "tweet_id": tweet_id,
+                "author_id": tweet.data.author_id,
+                "author_handle": author_handle,
+                "text": tweet.data.text,
+                "created_at": tweet.data.created_at,
+                "public_metrics": tweet.data.public_metrics._json if hasattr(tweet.data.public_metrics, "_json") else vars(tweet.data.public_metrics)
+            }
+
+        except tweepy.TweepyException as e:
+            logger.error(f"Error validating Twitter URL {url}: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"General error validating Twitter URL {url}: {str(e)}")
+            return None
+
+    async def get_post_metrics(self, url: str) -> Optional[Dict[str, Any]]:
+        """
+        Get metrics for a specific Twitter post.
+
+        Args:
+            url: Twitter post URL
+
+        Returns:
+            Dict containing post metrics or None if failed
+        """
+        try:
+            # Extract tweet ID and validate URL
+            post_info = await self.validate_post_url(url)
+            if not post_info:
+                return None
+
+            # Extract the metrics
+            metrics = post_info.get("public_metrics", {})
+
+            # Return formatted metrics
+            return {
+                "like_count": metrics.get("like_count", 0),
+                "retweet_count": metrics.get("retweet_count", 0),
+                "reply_count": metrics.get("reply_count", 0),
+                "quote_count": metrics.get("quote_count", 0),
+                "impression_count": metrics.get("impression_count", 0),
+                "retrieved_at": datetime.utcnow().isoformat()
+            }
+
+        except Exception as e:
+            logger.error(f"Error getting metrics for Twitter URL {url}: {str(e)}")
+            return None
+
 # Create a singleton instance of the TwitterService
 twitter_service = TwitterService()
 
-# Create a helper function to use the singleton
+# Create helper functions to use the singleton
 async def validate_twitter_handle(twitter_handle: str) -> bool:
     """
     Async wrapper for validating Twitter handles.
@@ -129,3 +245,27 @@ async def validate_twitter_handle(twitter_handle: str) -> bool:
         bool: True if the handle exists, False otherwise
     """
     return twitter_service.validate_handle(twitter_handle)
+
+async def validate_post_url(url: str) -> Optional[Dict[str, Any]]:
+    """
+    Validate a Twitter post URL and extract information from it.
+
+    Args:
+        url: Twitter post URL
+
+    Returns:
+        Dict containing post information or None if invalid
+    """
+    return await twitter_service.validate_post_url(url)
+
+async def get_post_metrics(url: str) -> Optional[Dict[str, Any]]:
+    """
+    Get metrics for a specific Twitter post.
+
+    Args:
+        url: Twitter post URL
+
+    Returns:
+        Dict containing post metrics or None if failed
+    """
+    return await twitter_service.get_post_metrics(url)

@@ -61,3 +61,36 @@ async def get_contract(contract_address: str) -> Optional[Dict[str, Any]]:
     except Exception as e:
         logger.error(f"Database error while retrieving contract: {str(e)}")
         return None
+
+async def update_contract_with_post(
+    contract_address: str, 
+    update_data: Dict[str, Any]
+) -> bool:
+    """
+    Update a contract with post data after a successful claim.
+
+    Args:
+        contract_address: The contract address to update
+        update_data: The data to update (post URL, metrics, etc.)
+
+    Returns:
+        bool: True if update was successful, False otherwise
+    """
+    try:
+        # Update the contract with the provided data
+        result = await db.contracts.update_one(
+            {"contract_address": contract_address},
+            {"$set": update_data}
+        )
+
+        # Check if update was successful
+        if result.modified_count > 0:
+            logger.info(f"Contract {contract_address} updated with post data")
+            return True
+        else:
+            logger.warning(f"No contract was updated for {contract_address}")
+            return False
+
+    except Exception as e:
+        logger.error(f"Database error while updating contract with post: {str(e)}")
+        return False
