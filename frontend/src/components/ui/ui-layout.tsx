@@ -129,12 +129,13 @@ export function UiLayout({
               {links.map(({ label, path }) => (
                 <li key={path}>
                   <Link
-                    className={
+                    className={`flex items-center gap-2 ${
                       pathname.startsWith(path) ? "active bg-base-300" : ""
-                    }
+                    }`}
                     href={path}
                     onClick={() => setIsMenuOpen(false)}
                   >
+                    <div className="w-2 h-2 rounded-full bg-primary"></div>
                     {label}
                   </Link>
                 </li>
