@@ -47,90 +47,83 @@ function ContractCard({ contract }: { contract: PublicKey }) {
     return (
       <div className="card bg-base-200 shadow-xl animate-pulse">
         <div className="card-body">
-          <div className="h-32 bg-base-300 rounded-lg"></div>
+          <div className="h-24 bg-base-300 rounded-lg"></div>
         </div>
       </div>
     );
   }
 
   const totalAmount = data.totalAmount.toNumber() / LAMPORTS_PER_SOL;
-  const paidAmount = data.paidTranches.toNumber() * trancheAmount;
-  const remainingAmount = totalAmount - paidAmount;
-  const isCompleted =
-    data.paidTranches.toNumber() === data.trancheCount.toNumber();
+  const paidTranches = data.paidTranches.toNumber();
+  const totalTranches = data.trancheCount.toNumber();
+  const isCompleted = paidTranches === totalTranches;
 
   return (
-    <div className="bg-base-100 p-4 border-l-2 border-base-300 hover:border-primary transition-all duration-300 shadow-sm hover:shadow-md">
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <h3 className="text-lg font-semibold">
-            {totalAmount.toFixed(2)} SOL Contract
-          </h3>
-          <div className="text-sm text-base-content/70">
-            {trancheAmount.toFixed(2)} SOL per tranche
-          </div>
-        </div>
-        <div
-          className={`badge badge-md ${
-            isCompleted ? "badge-success" : "badge-primary"
-          }`}
-        >
-          {isCompleted ? "Completed" : "Active"}
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <div className="flex justify-between text-sm mb-2">
-            <span className="font-medium">Progress</span>
-            <span>
-              {(
-                (data.paidTranches.toNumber() / data.trancheCount.toNumber()) *
-                100
-              ).toFixed(0)}
-              %
-            </span>
-          </div>
-          <ProgressBar
-            current={data.paidTranches.toNumber()}
-            total={data.trancheCount.toNumber()}
-          />
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          <div className="border-l-2 border-success/30 pl-3 py-2">
-            <div className="text-sm text-base-content/70">Paid</div>
-            <div className="font-semibold text-success">
-              {paidAmount.toFixed(2)} SOL
-            </div>
-          </div>
-          <div className="border-l-2 border-primary/30 pl-3 py-2">
-            <div className="text-sm text-base-content/70">Remaining</div>
-            <div className="font-semibold text-primary">
-              {remainingAmount.toFixed(2)} SOL
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-2">
-          <button
-            className="btn btn-xs btn-primary flex-1"
-            onClick={() => distributeTranchesMutation.mutateAsync()}
-            disabled={distributeTranchesMutation.isPending || isCompleted}
-          >
-            Distribute Tranche
-          </button>
-          <button
-            className="btn btn-xs btn-ghost btn-square"
-            onClick={() => {
-              if (
-                !window.confirm("Are you sure you want to close this contract?")
-              )
-                return;
+    <div className="bg-base-100 rounded-lg border border-base-200 hover:border-primary transition-all duration-300 hover:shadow-md">
+      <div className="p-6 relative">
+        <button
+          className="btn btn-ghost btn-sm absolute top-2 right-2"
+          onClick={() => {
+            if (
+              window.confirm("Are you sure you want to close this contract?")
+            ) {
               closeContractMutation.mutateAsync();
-            }}
-            disabled={closeContractMutation.isPending}
+            }
+          }}
+          disabled={closeContractMutation.isPending}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className="h-4 w-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
           >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+            />
+          </svg>
+        </button>
+
+        <div className="flex items-center justify-between mb-1">
+          <div className="flex items-center gap-2">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              className="h-4 w-4 text-base-content/70"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+              />
+            </svg>
+            <ExplorerLink
+              path={`account/${contract}`}
+              label={ellipsify(contract.toString())}
+              className="text-sm text-base-content/70 hover:text-primary"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div
+              className={`w-2.5 h-2.5 rounded-full ${
+                isCompleted ? "bg-success" : "bg-primary animate-pulse"
+              }`}
+            ></div>
+            <h3 className="text-lg font-semibold">
+              {totalAmount.toFixed(2)} SOL
+            </h3>
+          </div>
+          <div className="flex items-center gap-2 text-sm text-base-content/70">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="h-4 w-4"
@@ -142,26 +135,62 @@ function ContractCard({ contract }: { contract: PublicKey }) {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                d="M13 10V3L4 14h7v7l9-11h-7z"
               />
             </svg>
-          </button>
+            <span>{trancheAmount.toFixed(2)} SOL per tranche</span>
+          </div>
         </div>
 
-        <div className="text-xs space-y-1 pt-2 border-t border-base-200">
-          <div className="flex justify-between items-center text-base-content/70">
-            <span>Contract</span>
-            <ExplorerLink
-              path={`account/${contract}`}
-              label={ellipsify(contract.toString())}
-            />
+        <div className="space-y-4">
+          <div>
+            <div className="flex justify-between items-center mb-2">
+              <span className="text-sm font-medium">Progress</span>
+              <span className="text-sm font-medium">
+                {paidTranches}/{totalTranches}
+              </span>
+            </div>
+            <div className="h-2 bg-base-200 rounded-full overflow-hidden">
+              <div
+                className={`h-full transition-all duration-500 ${
+                  isCompleted ? "bg-success" : "bg-primary"
+                }`}
+                style={{ width: `${(paidTranches / totalTranches) * 100}%` }}
+              ></div>
+            </div>
           </div>
-          <div className="flex justify-between items-center text-base-content/70">
-            <span>Recipient</span>
-            <ExplorerLink
-              path={`account/${data.recipients[0]}`}
-              label={ellipsify(data.recipients[0].toString())}
-            />
+
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-2">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-4 w-4 text-base-content/70"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
+                />
+              </svg>
+              <ExplorerLink
+                path={`account/${data.recipients[0]}`}
+                label={ellipsify(data.recipients[0].toString())}
+                className="text-sm text-base-content/70 hover:text-primary"
+              />
+            </div>
+            {!isCompleted && (
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={() => distributeTranchesMutation.mutateAsync()}
+                disabled={distributeTranchesMutation.isPending}
+              >
+                Distribute
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -398,7 +427,7 @@ export function CreateContract() {
               type="number"
               step="0.1"
               min="0"
-              className="input input-bordered w-full bg-base-100"
+              className="input input-bordered w-full bg-base-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               value={totalAmount}
               onChange={(e) => setTotalAmount(e.target.value)}
               placeholder="0.00"
@@ -412,11 +441,11 @@ export function CreateContract() {
             </label>
             <input
               type="number"
-              min="1"
-              className="input input-bordered w-full bg-base-100"
+              min="0"
+              className="input input-bordered w-full bg-base-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
               value={trancheCount}
               onChange={(e) => setTrancheCount(e.target.value)}
-              placeholder="1"
+              placeholder="0"
             />
           </div>
         </div>
@@ -437,12 +466,12 @@ export function CreateContract() {
                   <input
                     type="number"
                     min="0"
-                    className="input input-bordered w-full bg-base-100"
+                    className="input input-bordered w-full bg-base-100 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     value={value}
                     onChange={(e) =>
                       handleTrancheDistributionChange(index, e.target.value)
                     }
-                    placeholder="Required likes"
+                    placeholder="0"
                   />
                 </div>
               ))}
@@ -581,11 +610,11 @@ export function ContractList() {
               <div className="space-y-4">
                 {group.active.length > 0 && (
                   <div>
-                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-primary"></div>
-                      Active Contracts
+                    <h4 className="text-base font-semibold mb-4 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-primary"></div>
+                      Active Contracts ({group.active.length})
                     </h4>
-                    <div className="grid md:grid-cols-2 gap-3">
+                    <div className="grid md:grid-cols-2 gap-4">
                       {group.active.map((contract) => (
                         <ContractCard
                           key={contract.publicKey.toString()}
@@ -597,12 +626,12 @@ export function ContractList() {
                 )}
 
                 {group.completed.length > 0 && (
-                  <div>
-                    <h4 className="text-sm font-semibold mb-3 flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full bg-success"></div>
-                      Completed Contracts
+                  <div className="mt-8">
+                    <h4 className="text-base font-semibold mb-4 flex items-center gap-2">
+                      <div className="w-2 h-2 rounded-full bg-success"></div>
+                      Completed Contracts ({group.completed.length})
                     </h4>
-                    <div className="grid md:grid-cols-2 gap-3">
+                    <div className="grid md:grid-cols-2 gap-4">
                       {group.completed.map((contract) => (
                         <ContractCard
                           key={contract.publicKey.toString()}

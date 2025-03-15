@@ -22,10 +22,10 @@ export function useFrontendProgram() {
   const { cluster } = useCluster();
   const transactionToast = useTransactionToast();
   const provider = useAnchorProvider();
-  const programId = useMemo(
-    () => getFrontendProgramId(cluster.network as Cluster),
-    [cluster]
-  );
+  const programId = useMemo(() => {
+    if (!cluster.network) return getFrontendProgramId("devnet" as Cluster);
+    return getFrontendProgramId(cluster.network.toString() as Cluster);
+  }, [cluster]);
   const program = useMemo(
     () => getFrontendProgram(provider, programId),
     [provider, programId]

@@ -123,7 +123,7 @@ export function ClusterUiModal({
   hideModal: () => void;
   show: boolean;
 }) {
-  const { addCluster } = useCluster();
+  // const { addCluster } = useCluster();
   const [name, setName] = useState("");
   const [network, setNetwork] = useState<ClusterNetwork | undefined>();
   const [endpoint, setEndpoint] = useState("");
@@ -137,7 +137,7 @@ export function ClusterUiModal({
         try {
           new Connection(endpoint);
           if (name) {
-            addCluster({ name, network, endpoint });
+            // addCluster({ name, network, endpoint });
             hideModal();
           } else {
             console.log("Invalid cluster name");
@@ -168,16 +168,16 @@ export function ClusterUiModal({
         onChange={(e) => setNetwork(e.target.value as ClusterNetwork)}
       >
         <option value={undefined}>Select a network</option>
-        <option value={ClusterNetwork.Devnet}>Devnet</option>
+        {/* <option value={ClusterNetwork.Devnet}>Devnet</option>
         <option value={ClusterNetwork.Testnet}>Testnet</option>
-        <option value={ClusterNetwork.Mainnet}>Mainnet</option>
+        <option value={ClusterNetwork.Mainnet}>Mainnet</option> */}
       </select>
     </AppModal>
   );
 }
 
 export function ClusterUiTable() {
-  const { clusters, setCluster, deleteCluster } = useCluster();
+  const { clusters, setCluster } = useCluster();
   return (
     <div className="overflow-x-auto">
       <table className="table border-4 border-separate border-base-300">
@@ -219,7 +219,7 @@ export function ClusterUiTable() {
                   className="btn btn-xs btn-default btn-outline"
                   onClick={() => {
                     if (!window.confirm("Are you sure?")) return;
-                    deleteCluster(item);
+                    // deleteCluster(item);
                   }}
                 >
                   <IconTrash size={16} />
