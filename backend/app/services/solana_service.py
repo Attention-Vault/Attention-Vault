@@ -26,7 +26,8 @@ async def validate_contract_address(address: str, get_tranches: bool = False) ->
         get_tranches: Whether to retrieve tranche information
 
     Returns:
-        If get_tranches is True, returns contract data with tranches.
+        If get_tranches is True, returns contract data with tranches
+            ie `total_amount` `tranche_count` `recipient` `total_amount` and `paid_tranches` variable value.
         Otherwise, returns True if the address is valid, False if not.
     """
     try:
@@ -51,25 +52,18 @@ async def validate_contract_address(address: str, get_tranches: bool = False) ->
             return True
 
         # For getting tranches, in a real implementation:
-        # - Parse the account data according to the contract's data structure
-        # - Or make RPC calls to extract tranche info
+        # - Parse the account data according to the contract's data structure in
+        # frontend/anchor/target/idl/frontend.json
+        # - make RPC calls to extract tranche info
 
         # Mock tranche data for demonstration purposes
         # In a real application, you would:
         # 1. Parse the contract data from the account info
         # 2. Make RPC calls to the contract to get tranche information
-        mock_tranches = {
-            "tranches": [
-                {"threshold": 100, "amount": "0.1 SOL"},
-                {"threshold": 500, "amount": "0.25 SOL"},
-                {"threshold": 1000, "amount": "0.5 SOL"},
-                {"threshold": 10000, "amount": "1 SOL"},
-            ]
-        }
-
+        paid_tranches = 2
         await client.close()
         logger.info(f"Retrieved tranche information for contract {address}")
-        return mock_tranches
+        return paid_tranches
     except Exception as e:
         logger.error(f"Error validating Solana address: {str(e)}")
         return False
