@@ -1,7 +1,7 @@
 "use client";
 
 import { Keypair, PublicKey, LAMPORTS_PER_SOL } from "@solana/web3.js";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
 import { ellipsify, AppHero } from "../ui/ui-layout";
 import { ExplorerLink } from "../cluster/cluster-ui";
 import { useWallet } from "@solana/wallet-adapter-react";
@@ -10,6 +10,7 @@ import {
   useFrontendProgram,
   useFrontendProgramContract,
 } from "./frontend-data-access";
+import { toast } from "react-hot-toast";
 
 function ProgressBar({ current, total }: { current: number; total: number }) {
   const percentage = (current / total) * 100;
@@ -169,13 +170,31 @@ function ContractCard({ contract }: { contract: PublicKey }) {
 }
 
 export function CreateContract() {
-  const { createContract } = useFrontendProgram();
+  const { createContract, program } = useFrontendProgram();
   const [totalAmount, setTotalAmount] = useState("");
   const [trancheCount, setTrancheCount] = useState("");
   const [recipient, setRecipient] = useState("");
+  const [twitterHandle, setTwitterHandle] = useState("");
+  const [verificationText, setVerificationText] = useState("");
+  const [trancheDistribution, setTrancheDistribution] = useState<string[]>([]);
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  useEffect(() => {
+    const count = parseInt(trancheCount);
+    if (!isNaN(count) && count > 0) {
+      setTrancheDistribution(Array(count).fill("0"));
+    } else {
+      setTrancheDistribution([]);
+    }
+  }, [trancheCount]);
+
+  const handleTrancheDistributionChange = (index: number, value: string) => {
+    const newDistribution = [...trancheDistribution];
+    newDistribution[index] = value;
+    setTrancheDistribution(newDistribution);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -192,19 +211,147 @@ export function CreateContract() {
       return;
     }
 
+    if (!twitterHandle) {
+      setError("Twitter handle is required");
+      return;
+    }
+
+    if (!verificationText) {
+      setError("Verification text is required");
+      return;
+    }
+
+    const distribution = trancheDistribution.map(Number);
+    if (distribution.some(isNaN) || distribution.some((n) => n <= 0)) {
+      setError("All tranche distribution values must be positive numbers");
+      return;
+    }
+
     try {
       const recipientPubkey = new PublicKey(recipient.trim());
       const recipients = Array(tranches).fill(recipientPubkey);
-      createContract.mutateAsync({
-        keypair: Keypair.generate(),
+      const keypair = Keypair.generate();
+      const contractAddress = keypair.publicKey.toString();
+
+      // Log the contract address that will be created
+      console.log("Generated contract address:", contractAddress);
+      toast.loading("Creating smart contract...");
+
+      const result = await createContract.mutateAsync({
+        keypair,
         totalAmount: amount,
         trancheCount: tranches,
         recipients: recipients,
       });
-    } catch (err) {
-      setError("Invalid recipient address format");
+
+      if (result) {
+        // Clear the loading toast
+        toast.dismiss();
+        console.log("Transaction signature:", result);
+        console.log("Contract address:", contractAddress);
+
+        // Show message about waiting for confirmation
+        const waitingToast = toast.loading(
+          "Contract confirmation may take up to 30 seconds, do not leave this page"
+        );
+
+        // First attempt after 15 seconds
+        await new Promise((resolve) => setTimeout(resolve, 15000));
+
+        let success = await makeApiCall(
+          contractAddress,
+          tranches,
+          distribution,
+          verificationText,
+          twitterHandle
+        );
+
+        // If first attempt fails, try again after another 15 seconds
+        if (!success) {
+          await new Promise((resolve) => setTimeout(resolve, 15000));
+          success = await makeApiCall(
+            contractAddress,
+            tranches,
+            distribution,
+            verificationText,
+            twitterHandle
+          );
+        }
+
+        // Dismiss the waiting toast
+        toast.dismiss(waitingToast);
+
+        if (success) {
+          toast.success("Contract created and confirmed successfully");
+        }
+        return success;
+      }
+    } catch (err: any) {
+      toast.dismiss();
+      setError(err.message || "Invalid recipient address format");
     }
   };
+
+  async function makeApiCall(
+    contractAddress: string,
+    tranches: number,
+    distribution: number[],
+    verificationText: string,
+    twitterHandle: string
+  ) {
+    const loadingToast = toast.loading("Setting up contract...");
+
+    const apiRequestBody = {
+      contract_address: contractAddress,
+      verification_text: verificationText,
+      twitter_handle: twitterHandle,
+      number_of_tranches: tranches,
+      tranche_distribution: distribution,
+    };
+
+    console.log("API Request Body:", JSON.stringify(apiRequestBody, null, 2));
+    console.log("Contract address being sent:", contractAddress);
+
+    try {
+      const response = await fetch(
+        "https://attention-vault.ashwinshome.co.uk/api/new_contract",
+        {
+          method: "POST",
+          headers: {
+            accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(apiRequestBody),
+        }
+      );
+
+      // Log raw response
+      const rawResponse = await response.text();
+      console.log("Raw API Response:", rawResponse);
+
+      // Dismiss the loading toast
+      toast.dismiss(loadingToast);
+
+      if (!response.ok) {
+        console.error("API Error Response:", rawResponse);
+        toast.error("Failed to complete contract setup");
+        return false;
+      }
+
+      const responseData = JSON.parse(rawResponse);
+      console.log("Parsed API Response:", responseData);
+
+      if (responseData.success === false) {
+        return false;
+      }
+
+      return true;
+    } catch (err: any) {
+      console.error("API Error:", err);
+      toast.error("Failed to complete contract setup");
+      return false;
+    }
+  }
 
   return (
     <div className="bg-base-100 p-6 md:p-8 border-b border-base-300">
@@ -224,6 +371,22 @@ export function CreateContract() {
             placeholder="Enter the recipient's Solana address"
           />
         </div>
+
+        <div className="form-control">
+          <label className="label py-1">
+            <span className="label-text text-base font-medium">
+              Twitter Handle
+            </span>
+          </label>
+          <input
+            type="text"
+            className="input input-bordered w-full bg-base-100"
+            value={twitterHandle}
+            onChange={(e) => setTwitterHandle(e.target.value)}
+            placeholder="Enter the influencer's Twitter handle"
+          />
+        </div>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="form-control">
             <label className="label py-1">
@@ -257,6 +420,50 @@ export function CreateContract() {
             />
           </div>
         </div>
+
+        {trancheDistribution.length > 0 && (
+          <div className="form-control">
+            <label className="label py-1">
+              <span className="label-text text-base font-medium">
+                Required Likes per Tranche
+              </span>
+            </label>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {trancheDistribution.map((value, index) => (
+                <div key={index} className="form-control">
+                  <label className="label py-1">
+                    <span className="label-text">Tranche {index + 1}</span>
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    className="input input-bordered w-full bg-base-100"
+                    value={value}
+                    onChange={(e) =>
+                      handleTrancheDistributionChange(index, e.target.value)
+                    }
+                    placeholder="Required likes"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="form-control">
+          <label className="label py-1">
+            <span className="label-text text-base font-medium">
+              Verification Conditions
+            </span>
+          </label>
+          <textarea
+            className="textarea textarea-bordered h-32 bg-base-100"
+            value={verificationText}
+            onChange={(e) => setVerificationText(e.target.value)}
+            placeholder="Describe the conditions under which the payment shall or shall not be made..."
+          />
+        </div>
+
         {error && <div className="alert alert-error py-3 text-sm">{error}</div>}
         <button
           type="submit"
