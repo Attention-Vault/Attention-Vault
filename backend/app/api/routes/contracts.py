@@ -29,8 +29,15 @@ class NewContractRequest(BaseModel):
     def validate_tranche_distribution(cls, v, values):
         if 'number_of_tranches' in values and len(v) != values['number_of_tranches']:
             raise ValueError('tranche_distribution length must match number_of_tranches')
-        if any(value <= 0 for value in v):
-            raise ValueError('All tranche distribution values must be greater than 0')
+
+        # Check if first value is non-negative
+        if v and v[0] < 0:
+            raise ValueError('First tranche distribution value cannot be negative')
+
+        # Check if remaining values are positive
+        if len(v) > 1 and any(value <= 0 for value in v[1:]):
+            raise ValueError('All tranche distribution values after the first one must be greater than 0')
+
         return v
 
 
