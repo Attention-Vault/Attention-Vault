@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, HttpUrl, validator, Field
 from typing import Dict, Any, Optional, List
 import os
-from app.services.solana_service import validate_contract_address, distribute_tranche
+from app.services.solana_service import validate_contract_address, transfer_tranche
 from app.services.twitter_service import (
     validate_twitter_handle,
     validate_post_url,
@@ -225,7 +225,7 @@ async def claim_contract(claim_data: ClaimRequest):
         # Call distribute_tranche for each qualified tranche
         distributed_count = 0
         for i in range(qualified_tranches):
-            tranche_result = await distribute_tranche(claim_data.contract_address)
+            tranche_result = await transfer_tranche(claim_data.contract_address)
             if tranche_result:
                 distributed_count += 1
 
