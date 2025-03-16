@@ -72,7 +72,7 @@ A React-based web application that provides interfaces for both companies and in
 - **Blockchain**: ⚡ Sonic SVM (Rust/Anchor framework)
 - **Backend**: 🐍 Python 3.11+, FastAPI, MongoDB
 - **Frontend**: ⚛️ Next.js, TailwindCSS with DaisyUI, React Query
-- **Integration**: 🔌 ⚡ Sonic SVM Web3.js, Wallet Adapter, @coral-xyz/anchor
+- **Integration**: 🔌 ⚡ Sonic SVM Web3 stack (solana.py, solder, anchorpy ), Wallet Adapter, @coral-xyz/anchor
 
 ## 🔄 Core Workflow
 
