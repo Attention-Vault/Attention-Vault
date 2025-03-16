@@ -300,12 +300,14 @@ async def debug_info():
     """
     Provides debug information.
     """
-    out = await validate_contract_address('Dwg2Z3cPq8p9dD7eaT3UqacBEwRBhisPDviLKyn5eF5j', get_tranches=True)
+    out = await validate_contract_address(
+        "Dwg2Z3cPq8p9dD7eaT3UqacBEwRBhisPDviLKyn5eF5j", get_tranches=True
+    )
 
     print(f"Validation output: {out}")
 
     return {
         "name": "Solana Contract API",
         "version": "1.0",
-        "description": "API for interacting with Solana contracts."
+        "description": "API for interacting with Solana contracts.",
     }
