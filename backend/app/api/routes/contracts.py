@@ -1,6 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel, HttpUrl, validator, Field
 from typing import Dict, Any, Optional, List
+import os
 from app.services.solana_service import validate_contract_address, distribute_tranche
 from app.services.twitter_service import (
     validate_twitter_handle,
@@ -167,7 +168,7 @@ async def claim_contract(claim_data: ClaimRequest):
         # Validate post URL
         post_info = await validate_post_url(claim_data.post_url)
         if not post_info:
-            return ContractResponse(success=False, message="Invalid post URL")
+            return ContractResponse(success=False, message="Invalid post URL or api timeout")
 
         # Check if the post author matches the expected Twitter handle
         if post_info["author_handle"].lower() != twitter_handle.lower().strip("@"):
@@ -186,12 +187,13 @@ async def claim_contract(claim_data: ClaimRequest):
                 reason="content_mismatch",
             )
 
-        # Get post metrics
-        metrics = await get_post_metrics(claim_data.post_url)
-        if not metrics:
-            return ContractResponse(
-                success=False, message="Failed to retrieve post metrics"
-            )
+        # # Get post metrics
+        # metrics = await get_post_metrics(claim_data.post_url)
+        # if not metrics:
+        #     return ContractResponse(
+        #         success=False, message="Failed to retrieve post metrics"
+        #     )
+        metrics = post_info['public_metrics']
 
         # Use the custom tranche distribution specified in the contract
         number_of_tranches = contract.get("number_of_tranches", 0)
@@ -223,7 +225,7 @@ async def claim_contract(claim_data: ClaimRequest):
         # Call distribute_tranche for each qualified tranche
         distributed_count = 0
         for i in range(qualified_tranches):
-            tranche_result = await distribute_tranche(claim_data.contract_address, i)
+            tranche_result = await distribute_tranche(claim_data.contract_address)
             if tranche_result:
                 distributed_count += 1
 

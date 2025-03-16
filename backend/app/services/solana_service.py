@@ -254,13 +254,12 @@ async def parse_contract_account_data(data: bytes) -> Optional[Dict]:
 """
 
 
-async def distribute_tranche(contract_address: str, owner_secret: str) -> bool:
+async def distribute_tranche(contract_address: str,) -> bool:
     """
     Distribute a tranche of a contract to the influencer.
 
     Args:
         contract_address: The contract address
-        owner_secret: The secret key of the contract owner in base58 format
 
     Returns:
         bool: True if the distribution was successful, False otherwise
@@ -271,6 +270,9 @@ async def distribute_tranche(contract_address: str, owner_secret: str) -> bool:
 
         # Convert contract address to PublicKey
         contract_pubkey = Pubkey.from_string(contract_address)
+
+        # Convert the private key to a keypair
+        owner_secret = WALLET_SECRET
 
         # Load owner's keypair
         if not owner_secret:
