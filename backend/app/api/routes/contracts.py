@@ -96,9 +96,9 @@ async def create_new_contract(contract_data: NewContractRequest):
         if not validate_text(contract_data.verification_text):
             return ContractResponse(success=False, message="Text validation failed")
 
-        # Validate Twitter handle
-        if not await validate_twitter_handle(contract_data.twitter_handle):
-            return ContractResponse(success=False, message="Invalid Twitter handle")
+        # # Validate Twitter handle
+        # if not await validate_twitter_handle(contract_data.twitter_handle):
+        #     return ContractResponse(success=False, message="Invalid Twitter handle")
 
         # Validate tranche distribution
         if len(contract_data.tranche_distribution) != contract_data.number_of_tranches:
