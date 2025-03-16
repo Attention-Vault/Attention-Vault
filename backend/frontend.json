@@ -1,0 +1,191 @@
+{
+  "address": "Dwg2Z3cPq8p9dD7eaT3UqacBEwRBhisPDviLKyn5eF5j",
+  "metadata": {
+    "name": "frontend",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "close_contract",
+      "discriminator": [
+        37,
+        244,
+        34,
+        168,
+        92,
+        202,
+        80,
+        106
+      ],
+      "accounts": [
+        {
+          "name": "contract",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "contract"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_contract",
+      "discriminator": [
+        244,
+        48,
+        244,
+        178,
+        216,
+        88,
+        122,
+        52
+      ],
+      "accounts": [
+        {
+          "name": "contract",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "owner",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "total_amount",
+          "type": "u64"
+        },
+        {
+          "name": "tranche_count",
+          "type": "u64"
+        },
+        {
+          "name": "recipients",
+          "type": {
+            "vec": "pubkey"
+          }
+        }
+      ]
+    },
+    {
+      "name": "distribute_tranche",
+      "discriminator": [
+        4,
+        101,
+        117,
+        116,
+        122,
+        242,
+        211,
+        91
+      ],
+      "accounts": [
+        {
+          "name": "contract",
+          "writable": true
+        },
+        {
+          "name": "recipient",
+          "writable": true
+        },
+        {
+          "name": "owner",
+          "signer": true
+        }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "PaymentContract",
+      "discriminator": [
+        151,
+        55,
+        24,
+        165,
+        12,
+        206,
+        38,
+        31
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "AllTranchesPaid",
+      "msg": "All tranches have been paid"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidRecipient",
+      "msg": "Invalid recipient for current tranche"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidRecipientsCount",
+      "msg": "Number of recipients must match tranche count"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidAmount",
+      "msg": "Total amount must be greater than 0"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidTrancheCount",
+      "msg": "Tranche count must be greater than 0"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidSigner",
+      "msg": "Invalid signer - must be owner or authorized wallet"
+    }
+  ],
+  "types": [
+    {
+      "name": "PaymentContract",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "owner",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          },
+          {
+            "name": "tranche_count",
+            "type": "u64"
+          },
+          {
+            "name": "recipients",
+            "type": {
+              "vec": "pubkey"
+            }
+          },
+          {
+            "name": "paid_tranches",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}

@@ -29,11 +29,7 @@ WALLET_SECRET = os.getenv("SOLANA_WALLET_SECRET", "")
 
 # Path to the IDL file
 IDL_PATH = (
-    Path(__file__).parents[3]
-    / "frontend"
-    / "anchor"
-    / "target"
-    / "idl"
+    Path(__file__).parents[2]
     / "frontend.json"
 )
 
