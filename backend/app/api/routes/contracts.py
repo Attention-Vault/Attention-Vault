@@ -301,7 +301,7 @@ async def debug_info():
     Provides debug information.
     """
     out = await validate_contract_address(
-        "Dwg2Z3cPq8p9dD7eaT3UqacBEwRBhisPDviLKyn5eF5j", get_tranches=True
+        "EjmSP39jgCud8DYBjm8w9RdKnbit9iBJsxd2bM3hs7FD", get_tranches=True
     )
 
     print(f"Validation output: {out}")
