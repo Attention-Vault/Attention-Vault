@@ -22,21 +22,29 @@ class NewContractRequest(BaseModel):
     contract_address: str
     verification_text: str
     twitter_handle: str
-    number_of_tranches: int = Field(..., gt=0, description="Number of tranches for the contract")
-    tranche_distribution: List[int] = Field(..., description="Distribution values for each tranche")
+    number_of_tranches: int = Field(
+        ..., gt=0, description="Number of tranches for the contract"
+    )
+    tranche_distribution: List[int] = Field(
+        ..., description="Distribution values for each tranche"
+    )
 
-    @validator('tranche_distribution')
+    @validator("tranche_distribution")
     def validate_tranche_distribution(cls, v, values):
-        if 'number_of_tranches' in values and len(v) != values['number_of_tranches']:
-            raise ValueError('tranche_distribution length must match number_of_tranches')
+        if "number_of_tranches" in values and len(v) != values["number_of_tranches"]:
+            raise ValueError(
+                "tranche_distribution length must match number_of_tranches"
+            )
 
         # Check if first value is non-negative
         if v and v[0] < 0:
-            raise ValueError('First tranche distribution value cannot be negative')
+            raise ValueError("First tranche distribution value cannot be negative")
 
         # Check if remaining values are positive
         if len(v) > 1 and any(value <= 0 for value in v[1:]):
-            raise ValueError('All tranche distribution values after the first one must be greater than 0')
+            raise ValueError(
+                "All tranche distribution values after the first one must be greater than 0"
+            )
 
         return v
 
@@ -193,7 +201,7 @@ async def claim_contract(claim_data: ClaimRequest):
             return ContractResponse(
                 success=False,
                 message="Contract does not have valid tranche configuration",
-                reason="invalid_tranches"
+                reason="invalid_tranches",
             )
 
         # Calculate how many tranches the post qualifies for based on likes
@@ -267,7 +275,7 @@ async def get_contract_info(contract_address: str):
             tranches_distributed=contract.get("tranches_distributed", 0),
             metrics=contract.get("metrics"),
             number_of_tranches=contract.get("number_of_tranches", 0),
-            tranche_distribution=contract.get("tranche_distribution", [])
+            tranche_distribution=contract.get("tranche_distribution", []),
         )
 
         return response
@@ -276,3 +284,28 @@ async def get_contract_info(contract_address: str):
         raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
+
+
+# Implement /health endpoint
+@router.get("/health")
+async def health_check():
+    """
+    Simple health check endpoint to verify the API is running.
+    """
+    return {"status": "ok"}
+
+
+@router.get("/debug")
+async def debug_info():
+    """
+    Provides debug information.
+    """
+    out = await validate_contract_address('Dwg2Z3cPq8p9dD7eaT3UqacBEwRBhisPDviLKyn5eF5j', get_tranches=True)
+
+    print(f"Validation output: {out}")
+
+    return {
+        "name": "Solana Contract API",
+        "version": "1.0",
+        "description": "API for interacting with Solana contracts."
+    }
