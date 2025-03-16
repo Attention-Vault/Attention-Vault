@@ -5,7 +5,8 @@ from datetime import datetime, date
 from app.core.config import settings
 from app.schemas.twitter import TweetMetrics
 from loguru import logger
-
+import asyncio
+import time
 
 class TwitterService:
     """Service for interacting with the Twitter API."""
@@ -140,7 +141,7 @@ class TwitterService:
 
         return None
 
-    async def validate_post_url(self, url: str) -> Optional[Dict[str, Any]]:
+    def validate_post_url(self, url: str) -> Optional[Dict[str, Any]]:
         """
         Validate a Twitter post URL and extract information from it.
 
@@ -191,7 +192,7 @@ class TwitterService:
                 "public_metrics": (
                     tweet.data.public_metrics._json
                     if hasattr(tweet.data.public_metrics, "_json")
-                    else vars(tweet.data.public_metrics)
+                    else tweet.data.public_metrics
                 ),
             }
 
@@ -241,9 +242,9 @@ twitter_service = TwitterService()
 
 
 # Create helper functions to use the singleton
-async def validate_twitter_handle(twitter_handle: str) -> bool:
+def validate_twitter_handle(twitter_handle: str) -> bool:
     """
-    Async wrapper for validating Twitter handles.
+    Wrapper for validating Twitter handles.
 
     Args:
         twitter_handle: The Twitter handle to validate
@@ -264,8 +265,9 @@ async def validate_post_url(url: str) -> Optional[Dict[str, Any]]:
     Returns:
         Dict containing post information or None if invalid
     """
-    return await twitter_service.validate_post_url(url)
-
+    post_info = twitter_service.validate_post_url(str(url))
+    time.sleep(1)
+    return post_info
 
 async def get_post_metrics(url: str) -> Optional[Dict[str, Any]]:
     """
