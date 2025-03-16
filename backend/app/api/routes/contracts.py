@@ -215,6 +215,14 @@ async def claim_contract(claim_data: ClaimRequest):
             if like_count >= threshold:
                 qualified_tranches += 1
 
+        contract_pre_claim_data = await validate_contract_address(claim_data.contract_address, get_tranches=True)
+        paid_tranches = contract_pre_claim_data["paid_tranches"]
+
+        qualified_tranches = qualified_tranches - paid_tranches
+
+        if qualified_tranches < 0:
+            qualified_tranches = 0
+
         if qualified_tranches == 0:
             return ContractResponse(
                 success=False,
@@ -231,11 +239,18 @@ async def claim_contract(claim_data: ClaimRequest):
                 distributed_count += 1
 
         # Update contract in database with post URL and metrics
+        contract_data_post_claim = await validate_contract_address(claim_data.contract_address, get_tranches=True)
+        # if paid_tranches <= number of treches that status is partially_claimed
+        if contract_data_post_claim["paid_tranches"] < contract_data_post_claim["tranche_count"]:
+            status = "partially_claimed"
+        else:
+            status = "claimed"
+
         current_time = datetime.datetime.now().isoformat()
         update_data = {
             "post_url": str(claim_data.post_url),
             "metrics": metrics,
-            "status": "claimed",
+            "status": status,
             "tranches_distributed": distributed_count,
             "claimed_at": current_time,  # Store the actual current time
         }
