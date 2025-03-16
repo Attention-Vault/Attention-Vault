@@ -14,6 +14,7 @@ from app.services.db_service import (
     get_contract,
     update_contract_with_post,
 )
+import datetime
 
 router = APIRouter()
 
@@ -230,12 +231,13 @@ async def claim_contract(claim_data: ClaimRequest):
                 distributed_count += 1
 
         # Update contract in database with post URL and metrics
+        current_time = datetime.datetime.now().isoformat()
         update_data = {
             "post_url": str(claim_data.post_url),
             "metrics": metrics,
             "status": "claimed",
             "tranches_distributed": distributed_count,
-            "claimed_at": "now()",  # MongoDB will handle this as current time
+            "claimed_at": current_time,  # Store the actual current time
         }
 
         await update_contract_with_post(claim_data.contract_address, update_data)
