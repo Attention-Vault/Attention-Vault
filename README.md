@@ -1,8 +1,8 @@
 # 🏦 🔐 Attention Vault
+![Attention Vault Logo](frontend/public/logo.png)
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://attention-vault.vercel.app/)
-![Attention Vault Logo](frontend/public/logo.png)
 
 ## Token Vesting 🔐 Based on Attention 👁️
 
