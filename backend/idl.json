@@ -1,0 +1,83 @@
+{
+  "version": "0.1.0",
+  "name": "frontend",
+  "instructions": [
+    {
+      "name": "createContract",
+      "accounts": [
+        { "name": "contract", "isMut": true, "isSigner": true },
+        { "name": "owner", "isMut": true, "isSigner": true },
+        { "name": "systemProgram", "isMut": false, "isSigner": false }
+      ],
+      "args": [
+        { "name": "totalAmount", "type": "u64" },
+        { "name": "trancheCount", "type": "u64" },
+        { "name": "recipients", "type": { "vec": "publicKey" } }
+      ]
+    },
+    {
+      "name": "distributeTranche",
+      "accounts": [
+        { "name": "contract", "isMut": true, "isSigner": false },
+        { "name": "recipient", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": false, "isSigner": true }
+      ],
+      "args": []
+    },
+    {
+      "name": "closeContract",
+      "accounts": [
+        { "name": "contract", "isMut": true, "isSigner": false },
+        { "name": "owner", "isMut": true, "isSigner": true }
+      ],
+      "args": []
+    }
+  ],
+  "accounts": [
+    {
+      "name": "PaymentContract",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          { "name": "owner", "type": "publicKey" },
+          { "name": "totalAmount", "type": "u64" },
+          { "name": "trancheCount", "type": "u64" },
+          { "name": "recipients", "type": { "vec": "publicKey" } },
+          { "name": "paidTranches", "type": "u64" }
+        ]
+      }
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "AllTranchesPaid",
+      "msg": "All tranches have been paid"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidRecipient",
+      "msg": "Invalid recipient for current tranche"
+    },
+    {
+      "code": 6002,
+      "name": "InvalidRecipientsCount",
+      "msg": "Number of recipients must match tranche count"
+    },
+    {
+      "code": 6003,
+      "name": "InvalidAmount",
+      "msg": "Total amount must be greater than 0"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidTrancheCount",
+      "msg": "Tranche count must be greater than 0"
+    },
+    {
+      "code": 6005,
+      "name": "InvalidSigner",
+      "msg": "Invalid signer - must be owner or authorized wallet"
+    }
+  ]
+}
