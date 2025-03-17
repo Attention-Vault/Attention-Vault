@@ -20,6 +20,9 @@ class Settings(BaseModel):
     TWITTER_ACCESS_SECRET: str = os.getenv("TWITTER_ACCESS_SECRET", "")
     TWITTER_BEARER_TOKEN: str = os.getenv("TWITTER_BEARER_TOKEN", "")
 
+    # Groq API credentials
+    GROQ_API_KEY: str = os.getenv("GROQ_API_KEY", "")
+
 
 # Create settings instance
 settings = Settings()

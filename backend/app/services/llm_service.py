@@ -1,4 +1,34 @@
 from loguru import logger
+from langchain_groq import ChatGroq
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.output_parsers import StrOutputParser
+from app.core.config import settings
+import os
+
+# Initialize Groq LLM client
+def get_llm_client():
+    """
+    Get the LLM client instance using Groq.
+
+    Returns:
+        ChatGroq: A configured LangChain ChatGroq client
+    """
+    try:
+        # Initialize the Groq LLM client with the API key from settings
+        if not settings.GROQ_API_KEY:
+            logger.warning("GROQ_API_KEY not set in environment variables")
+            return None
+
+        llm = ChatGroq(
+            model_name="llama3-8b-8192",  # Using LLaMa 3 8B model
+            api_key=settings.GROQ_API_KEY,
+            temperature=0.1,  # Low temperature for more deterministic responses
+            max_tokens=1024
+        )
+        return llm
+    except Exception as e:
+        logger.error(f"Error initializing LLM client: {str(e)}")
+        return None
 
 
 def validate_text(text: str) -> bool:
@@ -15,6 +45,32 @@ def validate_text(text: str) -> bool:
         bool: True if the text is valid, False otherwise
     """
     try:
+        if os.environ.get("GROQ_API_KEY"):
+            # Get LLM client
+            llm = get_llm_client()
+            if not llm:
+                # Fall back to basic validation if LLM client isn't available
+                logger.warning("LLM client not available, falling back to basic validation")
+                return True
+
+            # Create prompt template for validation
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", "You are a text validator that determines if text meets basic standards for processing. "
+                        "You should check if the text is coherent, meaningful, and doesn't contain harmful content."),
+                ("user", "Please validate the following text and respond with VALID or INVALID:\n\n{text}")
+            ])
+
+            # Create chain and run inference
+            chain = prompt | llm | StrOutputParser()
+            result = chain.invoke({"text": text})
+
+            # Check if the LLM considers the text valid
+            is_valid = "VALID" in result.upper()
+            if not is_valid:
+                logger.warning(f"LLM determined text is invalid: {result}")
+
+            return is_valid
+
         # Basic validation logic (example only)
         # In production, replace with actual LLM API call
 
@@ -57,26 +113,53 @@ async def verify_post_content(post_text: str, verification_text: str) -> bool:
     Returns:
         bool: True if the post content matches requirements, False otherwise
     """
-    return True # twitters api rate limits are insane, so we will just return true for now
+    # return True # twitters api rate limits are insane, so we will just return true for now
     try:
+        if os.environ.get("GROQ_API_KEY"):
+            # Get LLM client
+            llm = get_llm_client()
+
+            # Create prompt template for verification
+            prompt = ChatPromptTemplate.from_messages([
+                ("system", "You are tasked with determining if a tweet fulfills the given requirements. "
+                        "You must respond with only 'yes' or 'no'."),
+                ("user", """
+                You are tasked with determining if the following tweet fulfills the requirements.
+
+                TWEET:
+                {post_text}
+
+                REQUIREMENTS:
+                {verification_text}
+
+                Does the tweet fulfill the requirements? Answer with 'yes' or 'no' only.
+                """)
+            ])
+
+            # Create chain and run inference
+            chain = prompt | llm | StrOutputParser()
+            result = chain.invoke({
+                "post_text": post_text,
+                "verification_text": verification_text
+            })
+
+            # Check the LLM's decision
+            result = result.lower().strip()
+            logger.info(f"LLM verification result: {result}")
+
+            # Interpret the response
+            if "yes" in result:
+                return True
+            else:
+                return False
+        else:
+            return True
+
         logger.info(f"Verifying post content against verification requirements")
         logger.info(f"Post text: {post_text}")
         logger.info(f"Verification text: {verification_text}")
 
-        # Basic implementation (placeholder for actual LLM call)
-        # In production, construct a prompt like:
-        # prompt = f"""
-        # You are tasked with determining if the following tweet fulfills the requirements.
-        #
-        # TWEET:
-        # {post_text}
-        #
-        # REQUIREMENTS:
-        # {verification_text}
-        #
-        # Does the tweet fulfill the requirements? Answer with 'yes' or 'no' only.
-        # """
-
+        # Basic implementation
         # For demonstration purposes, we'll do a simple check:
         # 1. Check if post isn't empty
         if not post_text or len(post_text.strip()) == 0:
