@@ -80,6 +80,8 @@ def validate_text(text: str) -> bool:
                 logger.warning(f"LLM determined text is invalid: {result}")
 
             return is_valid
+        else :
+            return True
 
         # Basic validation logic (example only)
         # In production, replace with actual LLM API call
