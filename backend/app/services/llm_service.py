@@ -80,7 +80,7 @@ def validate_text(text: str) -> bool:
                 logger.warning(f"LLM determined text is invalid: {result}")
 
             return is_valid
-        else :
+        else:
             return True
 
         # Basic validation logic (example only)
