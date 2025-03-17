@@ -23,7 +23,7 @@ def get_llm_client():
             model_name="llama3-8b-8192",  # Using LLaMa 3 8B model
             api_key=settings.GROQ_API_KEY,
             temperature=0.1,  # Low temperature for more deterministic responses
-            max_tokens=1024
+            max_tokens=1024,
         )
         return llm
     except Exception as e:
@@ -50,15 +50,25 @@ def validate_text(text: str) -> bool:
             llm = get_llm_client()
             if not llm:
                 # Fall back to basic validation if LLM client isn't available
-                logger.warning("LLM client not available, falling back to basic validation")
+                logger.warning(
+                    "LLM client not available, falling back to basic validation"
+                )
                 return True
 
             # Create prompt template for validation
-            prompt = ChatPromptTemplate.from_messages([
-                ("system", "You are a text validator that determines if text meets basic standards for processing. "
-                        "You should check if the text is coherent, meaningful, and doesn't contain harmful content."),
-                ("user", "Please validate the following text and respond with VALID or INVALID:\n\n{text}")
-            ])
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "system",
+                        "You are a text validator that determines if text meets basic standards for processing. "
+                        "You should check if the text is coherent, meaningful, and doesn't contain harmful content.",
+                    ),
+                    (
+                        "user",
+                        "Please validate the following text and respond with VALID or INVALID:\n\n{text}",
+                    ),
+                ]
+            )
 
             # Create chain and run inference
             chain = prompt | llm | StrOutputParser()
@@ -120,10 +130,16 @@ async def verify_post_content(post_text: str, verification_text: str) -> bool:
             llm = get_llm_client()
 
             # Create prompt template for verification
-            prompt = ChatPromptTemplate.from_messages([
-                ("system", "You are tasked with determining if a tweet fulfills the given requirements. "
-                        "You must respond with only 'yes' or 'no'."),
-                ("user", """
+            prompt = ChatPromptTemplate.from_messages(
+                [
+                    (
+                        "system",
+                        "You are tasked with determining if a tweet fulfills the given requirements. "
+                        "You must respond with only 'yes' or 'no'.",
+                    ),
+                    (
+                        "user",
+                        """
                 You are tasked with determining if the following tweet fulfills the requirements.
 
                 TWEET:
@@ -133,15 +149,16 @@ async def verify_post_content(post_text: str, verification_text: str) -> bool:
                 {verification_text}
 
                 Does the tweet fulfill the requirements? Answer with 'yes' or 'no' only.
-                """)
-            ])
+                """,
+                    ),
+                ]
+            )
 
             # Create chain and run inference
             chain = prompt | llm | StrOutputParser()
-            result = chain.invoke({
-                "post_text": post_text,
-                "verification_text": verification_text
-            })
+            result = chain.invoke(
+                {"post_text": post_text, "verification_text": verification_text}
+            )
 
             # Check the LLM's decision
             result = result.lower().strip()

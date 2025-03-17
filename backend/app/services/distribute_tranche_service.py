@@ -15,14 +15,19 @@ import requests
 from loguru import logger
 
 # Add the backend directory to the path so we can import modules from there
-sys.path.append(str(Path(__file__).parents[1] / 'backend'))
+sys.path.append(str(Path(__file__).parents[1] / "backend"))
 from solders.instruction import Instruction, AccountMeta
+
 # Import contract client modules
 from app.contract_client.program_id import PROGRAM_ID
-from app.contract_client.instructions.distribute_tranche import distribute_tranche, DistributeTrancheAccounts
+from app.contract_client.instructions.distribute_tranche import (
+    distribute_tranche,
+    DistributeTrancheAccounts,
+)
 
 # Default RPC URL (testnet)
 SOLANA_RPC_URL = "https://api.testnet.sonic.game"
+
 
 async def get_contract_data(payment_contract_address: str) -> dict:
     """
@@ -119,7 +124,8 @@ async def get_contract_data(payment_contract_address: str) -> dict:
         logger.error(f"Error getting contract data: {str(e)}")
         return None
 
-async def main(payment_contract_address: str ):
+
+async def main(payment_contract_address: str):
     """
     Main function to distribute a tranche for a given payment contract.
     """
@@ -173,16 +179,20 @@ async def main(payment_contract_address: str ):
             await client.close()
             return False
 
-        current_recipient = Pubkey.from_string(contract_data["recipients"][current_recipient_index])
+        current_recipient = Pubkey.from_string(
+            contract_data["recipients"][current_recipient_index]
+        )
 
         print(f"Current recipient: {current_recipient}")
-        print(f"Paid tranches: {contract_data['paid_tranches']} of {contract_data['tranche_count']}")
+        print(
+            f"Paid tranches: {contract_data['paid_tranches']} of {contract_data['tranche_count']}"
+        )
 
         # Prepare the accounts for the instruction
         accounts = DistributeTrancheAccounts(
             contract=contract_pubkey,
             recipient=current_recipient,
-            owner=keypair.pubkey()
+            owner=keypair.pubkey(),
         )
 
         # Create the distribute_tranche instruction
@@ -206,8 +216,10 @@ async def main(payment_contract_address: str ):
     except Exception as e:
         print(f"Error executing distribute_tranche: {str(e)}")
         import traceback
+
         traceback.print_exc()
         return False
+
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:

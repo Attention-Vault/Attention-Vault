@@ -8,6 +8,7 @@ from loguru import logger
 import asyncio
 import time
 
+
 class TwitterService:
     """Service for interacting with the Twitter API."""
 
@@ -268,6 +269,7 @@ async def validate_post_url(url: str) -> Optional[Dict[str, Any]]:
     post_info = twitter_service.validate_post_url(str(url))
     time.sleep(1)
     return post_info
+
 
 async def get_post_metrics(url: str) -> Optional[Dict[str, Any]]:
     """

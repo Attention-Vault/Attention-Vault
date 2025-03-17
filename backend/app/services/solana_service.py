@@ -8,6 +8,7 @@ from pathlib import Path
 import requests
 from solders.pubkey import Pubkey as PublicKey
 import base64
+
 # Import solana.py and solders libraries
 from solana.rpc.async_api import AsyncClient
 from solders.pubkey import Pubkey
@@ -15,6 +16,7 @@ from solders.keypair import Keypair
 from solders.transaction import Transaction
 from solders.system_program import ID as SYS_PROGRAM_ID
 from anchorpy import Idl, Program
+
 # from solana.transaction import AccountMeta, TransactionInstruction
 from solana.rpc.commitment import Confirmed
 
@@ -25,10 +27,7 @@ SOLANA_TESTNET_RPC = "https://api.testnet.sonic.game"
 WALLET_SECRET = os.getenv("SOLANA_WALLET_SECRET", "")
 
 # Path to the IDL file
-IDL_PATH = (
-    Path(__file__).parents[2]
-    / "frontend.json"
-)
+IDL_PATH = Path(__file__).parents[2] / "frontend.json"
 
 
 def load_idl() -> Dict:
@@ -226,7 +225,9 @@ async def parse_contract_account_data(data: bytes) -> Optional[Dict]:
     return None  # use get_payment_info instead
 
 
-async def transfer_tranche(contract_address: str,) -> bool:
+async def transfer_tranche(
+    contract_address: str,
+) -> bool:
     """
     Distribute a tranche of a contract to the influencer.
 
@@ -239,9 +240,9 @@ async def transfer_tranche(contract_address: str,) -> bool:
     try:
         # Import the function only when needed to avoid circular imports
         from app.services.distribute_tranche_service import main as tranche_distributor
+
         success = await tranche_distributor(contract_address)
         return success
-
 
     except Exception as e:
         logger.error(
