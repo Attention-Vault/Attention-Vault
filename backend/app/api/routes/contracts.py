@@ -248,7 +248,7 @@ async def claim_contract(claim_data: ClaimRequest):
         )
         # if paid_tranches <= number of treches that status is partially_claimed
         if (
-            contract_data_post_claim["paid_tranches"]
+            contract_pre_claim_data["paid_tranches"] + distributed_count
             < contract_data_post_claim["tranche_count"]
         ):
             status = "partially_claimed"
@@ -329,7 +329,7 @@ async def debug_info():
     Provides debug information.
     """
     out = await validate_contract_address(
-        "EjmSP39jgCud8DYBjm8w9RdKnbit9iBJsxd2bM3hs7FD", get_tranches=True
+        "CrjUPjNTV7CR5eUCL8x3FxEXJd7gxMZ8x73bXTkMWMap", get_tranches=True
     )
 
     print(f"Validation output: {out}")
