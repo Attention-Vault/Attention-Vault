@@ -17,7 +17,7 @@ export default function DashboardFeature() {
             <div className="text-center max-w-4xl mx-auto">
               <h1 className="text-5xl md:text-7xl font-bold mt-8 mb-8 leading-tight tracking-tight">
                 <span className="bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] animate-gradient bg-clip-text text-transparent">
-                  Attention Vault
+                  Attention Vault!
                 </span>
               </h1>
               <p className="text-xl md:text-2xl text-base-content/70 mb-12 leading-relaxed max-w-3xl mx-auto">
