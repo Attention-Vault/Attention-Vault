@@ -3,6 +3,8 @@
 
 [![MIT License](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![Live Demo](https://img.shields.io/badge/demo-online-green.svg)](https://attention-vault.vercel.app/)
+[![Youtube demo](https://img.shields.io/badge/youtube-demo-red?logo=youtube)](https://youtu.be/mfBIXVsPKmQ)
+[![Pitch deck](https://img.shields.io/badge/pitch-deck-yellow)]([https://youtu.be/mfBIXVsPKmQ](https://docs.google.com/presentation/d/1fAmXytLr9bw6bLm5Pe2Oyom3cAIqAsT3Jwzg1-F7rTg/mobilepresent?slide=id.g28a8b58795f_2_0))
 
 ## Token Vesting 🔐 Based on Attention 👁️
 

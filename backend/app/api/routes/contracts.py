@@ -169,7 +169,9 @@ async def claim_contract(claim_data: ClaimRequest):
         # Validate post URL
         post_info = await validate_post_url(claim_data.post_url)
         if not post_info:
-            return ContractResponse(success=False, message="Invalid post URL or api timeout")
+            return ContractResponse(
+                success=False, message="Invalid post URL or api timeout"
+            )
 
         # Check if the post author matches the expected Twitter handle
         if post_info["author_handle"].lower() != twitter_handle.lower().strip("@"):
@@ -194,7 +196,7 @@ async def claim_contract(claim_data: ClaimRequest):
         #     return ContractResponse(
         #         success=False, message="Failed to retrieve post metrics"
         #     )
-        metrics = post_info['public_metrics']
+        metrics = post_info["public_metrics"]
 
         # Use the custom tranche distribution specified in the contract
         number_of_tranches = contract.get("number_of_tranches", 0)
@@ -215,6 +217,16 @@ async def claim_contract(claim_data: ClaimRequest):
             if like_count >= threshold:
                 qualified_tranches += 1
 
+        contract_pre_claim_data = await validate_contract_address(
+            claim_data.contract_address, get_tranches=True
+        )
+        paid_tranches = contract_pre_claim_data["paid_tranches"]
+
+        qualified_tranches = qualified_tranches - paid_tranches
+
+        if qualified_tranches < 0:
+            qualified_tranches = 0
+
         if qualified_tranches == 0:
             return ContractResponse(
                 success=False,
@@ -231,11 +243,23 @@ async def claim_contract(claim_data: ClaimRequest):
                 distributed_count += 1
 
         # Update contract in database with post URL and metrics
+        contract_data_post_claim = await validate_contract_address(
+            claim_data.contract_address, get_tranches=True
+        )
+        # if paid_tranches <= number of treches that status is partially_claimed
+        if (
+            contract_pre_claim_data["paid_tranches"] + distributed_count
+            < contract_data_post_claim["tranche_count"]
+        ):
+            status = "partially_claimed"
+        else:
+            status = "claimed"
+
         current_time = datetime.datetime.now().isoformat()
         update_data = {
             "post_url": str(claim_data.post_url),
             "metrics": metrics,
-            "status": "claimed",
+            "status": status,
             "tranches_distributed": distributed_count,
             "claimed_at": current_time,  # Store the actual current time
         }
@@ -305,7 +329,7 @@ async def debug_info():
     Provides debug information.
     """
     out = await validate_contract_address(
-        "EjmSP39jgCud8DYBjm8w9RdKnbit9iBJsxd2bM3hs7FD", get_tranches=True
+        "CrjUPjNTV7CR5eUCL8x3FxEXJd7gxMZ8x73bXTkMWMap", get_tranches=True
     )
 
     print(f"Validation output: {out}")
